@@ -1,0 +1,5 @@
+#!/bin/bash
+
+baseDir=$(cd `dirname $0`; dirname `pwd`)
+
+docker-compose -p starrynight -f ${baseDir}/compose/docker-compose.yml "$@"

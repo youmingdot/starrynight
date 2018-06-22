@@ -1,0 +1,69 @@
+#!/usr/bin/env php
+<?php
+
+define('LAWOOLE_START', microtime(true));
+
+/*
+|--------------------------------------------------------------------------
+| Register The Auto Loader
+|--------------------------------------------------------------------------
+|
+| Composer provides a convenient, automatically generated class loader
+| for our application. We just need to utilize it! We'll require it
+| into the script here so that we do not have to worry about the
+| loading of any our classes "manually". Feels great to relax.
+|
+*/
+
+require __DIR__.'/vendor/autoload.php';
+
+$app = require_once __DIR__.'/bootstrap/app.php';
+
+/*
+|--------------------------------------------------------------------------
+| Get Console Input
+|--------------------------------------------------------------------------
+|
+| Here we create a console input instance which used for read arguments
+| from CLI command. The "server" command is different from "artisan" that
+| we can only pass a server command to it.
+|
+*/
+
+$input = new Symfony\Component\Console\Input\ArgvInput(
+    isset($_SERVER['argv'][1]) && $_SERVER['argv'][1][0] != '-'
+        ? array_merge([$_SERVER['argv'][0], 'server:'.$_SERVER['argv'][1]], array_slice($_SERVER['argv'], 2))
+        : array_merge([$_SERVER['argv'][0], 'server:start'], array_slice($_SERVER['argv'], 1))
+);
+
+/*
+|--------------------------------------------------------------------------
+| Run The Server Command
+|--------------------------------------------------------------------------
+|
+| When we run the console application, the current CLI command will be
+| executed in this console and the response sent back to a terminal
+| or another output device for the developers. Here goes nothing!
+|
+*/
+
+$kernel = $app->make(Illuminate\Contracts\Console\Kernel::class);
+
+$status = $kernel->handle(
+    $input, new Symfony\Component\Console\Output\ConsoleOutput
+);
+
+/*
+|--------------------------------------------------------------------------
+| Shutdown The Application
+|--------------------------------------------------------------------------
+|
+| Once the server command has finished running, we will fire off the
+| shutdown events so that any final work may be done by the application
+| before we shut down the process.
+|
+*/
+
+$kernel->terminate($input, $status);
+
+exit($status);
