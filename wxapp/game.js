@@ -1,6 +1,6 @@
-import './js/libs/weapp-adapter'
-import './js/libs/symbol'
+import 'libs/weapp-adapter'
+import 'libs/symbol'
 
-import StarryNight from './js/main'
+import StarryNight from 'main'
 
-new StarryNight()
+new StarryNight().run()
