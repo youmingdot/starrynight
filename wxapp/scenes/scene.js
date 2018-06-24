@@ -18,7 +18,10 @@ export default class Scene {
 
         this.camera = new THREE.PerspectiveCamera(50, this.aspect, 0.1, 2000)
 
+        this.scene.add(this.camera)
+
         this.renderer = new THREE.WebGLRenderer({ context: context })
+        this.renderer.setClearColor(0xEEEEEE)
         this.renderer.setSize(this.width, this.height)
 
         this.sprites = []
