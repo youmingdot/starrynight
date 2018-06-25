@@ -1,63 +1,37 @@
-import SplashScene from 'scenes/splash'
+import Scene from 'scene/scene'
 
 export default class StarryNight {
 
     constructor () {
-        this.sceneStack = []
-        this.scene = null
+        this.initialize()
 
-        this.looper = this.loop.bind(this);
-
-        console.log('Screen size: ' + window.innerWidth + ' x ' + window.innerHeight + ' .')
-
-        this.asTouchHandler();
+        this.looper = this.loop.bind(this)
     }
 
     /**
-     * Make the instance as a touch handler.
+     * Initialize the Three's world.
      */
-    asTouchHandler () {
+    initialize () {
+        console.log('Screen size: ' + window.innerWidth + ' x ' + window.innerHeight + ' .')
+
+        this.scene = new Scene(canvas, window.innerWidth, window.innerHeight)
+
         wx.onTouchStart(this.onTouchStart.bind(this))
         wx.onTouchMove(this.onTouchMove.bind(this))
         wx.onTouchEnd(this.onTouchEnd.bind(this))
         wx.onTouchCancel(this.onTouchCancel.bind(this))
+
+        this.scene.camera.position.x = -30
+        this.scene.camera.position.y = 20
+        this.scene.camera.position.z = 20
+
+        this.scene.lookAt(this.scene.scene.position)
     }
 
     run () {
         console.log('The Starry Starry Night is running.')
 
-        this.pushScene(new SplashScene())
-
         this.loop()
-    }
-
-    /**
-     * Clear the scene stack and push a new scene.
-     */
-    replaceScene (scene) {
-        this.sceneStack = []
-        this.pushScene(scene)
-    }
-
-    /**
-     * Push a new scene to the stack.
-     */
-    pushScene (scene) {
-        this.sceneStack.push(scene)
-        this.scene = scene
-    }
-
-    /**
-     * Pop a scene.
-     */
-    popScene () {
-        this.sceneStack.pop()
-
-        if (this.sceneStack.length < 1) {
-            return this.scene = null
-        }
-
-        this.scene = this.sceneStack[this.sceneStack.length - 1]
     }
 
     /**
@@ -74,53 +48,41 @@ export default class StarryNight {
      * Do the updating.
      */
     update () {
-        if (this.scene != null) {
-            this.scene.update()
-        }
+        this.scene.update()
     }
 
     /**
      * Render to the screen.
      */
     render () {
-        if (this.scene != null) {
-            this.scene.render()
-        }
+        this.scene.render()
     }
 
     /**
      * Called when touch start.
      */
     onTouchStart (event) {
-        if (this.scene != null) {
-            this.scene.onTouchStart(event)
-        }
+
     }
 
     /**
      * Called when touch move.
      */
     onTouchMove (event) {
-        if (this.scene != null) {
-            this.scene.onTouchMove(event)
-        }
+
     }
 
     /**
      * Called when touch end.
      */
     onTouchEnd (event) {
-        if (this.scene != null) {
-            this.scene.onTouchEnd(event)
-        }
+
     }
 
     /**
      * Called when touch cancel.
      */
     onTouchCancel (event) {
-        if (this.scene != null) {
-            this.scene.onTouchCancel(event)
-        }
+
     }
 }
