@@ -1,5 +1,6 @@
 import * as THREE from '../libs/three.js'
-import SplashSprite from "../sprites/splash";
+
+import SplashSprite from '../sprites/splash';
 
 export default class Scene {
 
