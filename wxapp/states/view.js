@@ -1,5 +1,3 @@
-
-
 let instance
 
 export default class ViewState {
@@ -15,6 +13,8 @@ export default class ViewState {
     }
 
     initialize () {
-
+        this.page = 'splash'
     }
+
+
 }

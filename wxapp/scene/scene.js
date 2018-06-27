@@ -1,6 +1,8 @@
-import * as THREE from '../libs/three.js'
+import * as THREE from '../libs/three'
 
-import SplashSprite from '../sprites/splash';
+import Toucher from 'toucher'
+
+import SplashSprite from '../sprites/splash'
 
 export default class Scene {
 
@@ -12,6 +14,8 @@ export default class Scene {
 
         this.width = width
         this.height = height
+
+        this.toucher = new Toucher(this)
 
         this.scene = new THREE.Scene()
 

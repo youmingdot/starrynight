@@ -1,4 +1,3 @@
-
 let instance
 
 class Pointer {
@@ -6,15 +5,15 @@ class Pointer {
     constructor (id, x, y, time) {
         this.id = id
 
+        this.initialize(x, y, time)
+    }
+
+    initialize (x, y, time) {
         this.sX = this.x = x
         this.sY = this.y = y
 
         this.sTime = this.time = time
 
-        this.initialize()
-    }
-
-    initialize () {
         // Aspect
         this.aspX = .0
         this.aspY = .0
@@ -28,19 +27,22 @@ class Pointer {
      * Update the pointer.
      */
     update (x, y, time) {
-        this.calculateSpeed(x, y, time)
+        let disX = x - this.x
+        let disY = y - this.y
+        let hypotenuse = Math.sqrt(disX * disX + disY * disY)
+        let during = time - this.time
+
+        // Aspect
+        this.aspX = hypotenuse ? disX / hypotenuse : 0
+        this.aspY = hypotenuse ? disY / hypotenuse : 0
+
+        // Speed
+        this.speX = during ? disX / during : 0
+        this.speY = during ? disY / during : 0
 
         this.x = x
         this.y = y
         this.time = time
-    }
-
-    calculateSpeed (x, y, time) {
-        let disX = x - this.x
-        let disY = y - this.y
-        let during = time - this.time
-
-
     }
 }
 
@@ -59,12 +61,12 @@ export default class Toucher {
 
         this.scene = scene
 
+        this.listeners = []
+
         this.initialize()
     }
 
     initialize () {
-        this.touching = false
-
         this.pointers = {}
 
         this.scene.canvas.addEventListener('touchstart', this.onTouchStart.bind(this))
@@ -73,21 +75,35 @@ export default class Toucher {
         this.scene.canvas.addEventListener('touchcancel', this.onTouchCancel.bind(this))
     }
 
+    listen (listener) {
+        for (let index in this.listeners) {
+            if (this.listeners[index] === listener) {
+                return
+            }
+        }
+
+        this.listeners.push(listener)
+    }
+
     /**
      * Called when touch start.
      */
     onTouchStart (event) {
         event.preventDefault()
 
-        this.touching = true
+        let actives = {}
 
         for (let index = 0; index < event.changedTouches.length; index ++) {
             let touch = event.changedTouches[index]
 
-            let pointer = new Pointer(touch.identifier, touch.clientX, touch.clientY, touch.timeStamp)
+            let pointer = new Pointer(touch.identifier, touch.clientX, touch.clientY, event.timeStamp)
+
+            actives[pointer.id] = pointer
 
             this.pointers[pointer.id] = pointer
         }
+
+        this.dispatch('onTouchStart', actives)
     }
 
     /**
@@ -96,7 +112,7 @@ export default class Toucher {
     onTouchMove (event) {
         event.preventDefault()
 
-        this.touching = true
+        let actives = {}
 
         for (let index = 0; index < event.changedTouches.length; index ++) {
             let touch = event.changedTouches[index]
@@ -104,9 +120,13 @@ export default class Toucher {
             if (this.pointers.hasOwnProperty(touch.identifier)) {
                 let pointer = this.pointers[touch.identifier]
 
-                pointer.update(touch.clientX, touch.clientY, touch.timeStamp)
+                actives[pointer.id] = pointer
+
+                pointer.update(touch.clientX, touch.clientY, event.timeStamp)
             }
         }
+
+        this.dispatch('onTouchMove', actives)
     }
 
     /**
@@ -115,9 +135,7 @@ export default class Toucher {
     onTouchEnd (event) {
         event.preventDefault()
 
-        this.touching = false
-
-        let pointers = []
+        let actives = {}
 
         for (let index = 0; index < event.changedTouches.length; index ++) {
             let touch = event.changedTouches[index]
@@ -125,13 +143,15 @@ export default class Toucher {
             if (this.pointers.hasOwnProperty(touch.identifier)) {
                 let pointer = this.pointers[touch.identifier]
 
-                pointer.update(touch.clientX, touch.clientY, touch.timeStamp)
+                pointer.update(touch.clientX, touch.clientY, event.timeStamp)
 
-                pointers.push(pointer)
+                actives[pointer.id] = pointer
 
                 delete this.pointers[pointer.id]
             }
         }
+
+        this.dispatch('onTouchEnd', actives)
     }
 
     /**
@@ -140,9 +160,7 @@ export default class Toucher {
     onTouchCancel (event) {
         event.preventDefault()
 
-        this.touching = false
-
-        let pointers = []
+        let actives = {}
 
         for (let index = 0; index < event.changedTouches.length; index ++) {
             let touch = event.changedTouches[index]
@@ -150,12 +168,20 @@ export default class Toucher {
             if (this.pointers.hasOwnProperty(touch.identifier)) {
                 let pointer = this.pointers[touch.identifier]
 
-                pointer.update(touch.clientX, touch.clientY, touch.timeStamp)
+                pointer.update(touch.clientX, touch.clientY, event.timeStamp)
 
-                pointers.push(pointer)
+                actives[pointer.id] = pointer
 
-                delete this.pointers[touch.identifier]
+                delete this.pointers[pointer.id]
             }
         }
+
+        this.dispatch('onTouchCancel', actives)
+    }
+
+    dispatch (type, actives) {
+        this.listeners.forEach((listener) => {
+            listener[type].call(this, this.pointers, actives)
+        })
     }
 }

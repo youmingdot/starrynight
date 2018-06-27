@@ -1,3 +1,5 @@
+import Toucher from '../scene/toucher'
+
 export default class Sprite {
 
     /**
@@ -7,6 +9,8 @@ export default class Sprite {
         this.scene = scene
 
         this.initialize()
+
+        Toucher.instance().listen(this)
     }
 
     /**
@@ -21,5 +25,33 @@ export default class Sprite {
      */
     update () {
         //
+    }
+
+    /**
+     * Called when touch start.
+     */
+    onTouchStart (pointers, actives) {
+
+    }
+
+    /**
+     * Called when touch move.
+     */
+    onTouchMove (pointers, actives) {
+
+    }
+
+    /**
+     * Called when touch end.
+     */
+    onTouchEnd (pointers, actives) {
+
+    }
+
+    /**
+     * Called when touch cancel.
+     */
+    onTouchCancel (pointers, actives) {
+
     }
 }

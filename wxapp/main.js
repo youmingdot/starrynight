@@ -1,5 +1,4 @@
 import Scene from 'scene/scene'
-import Toucher from 'scene/toucher'
 
 export default class StarryNight {
 
@@ -16,7 +15,6 @@ export default class StarryNight {
         console.log('Screen size: ' + window.innerWidth + ' x ' + window.innerHeight + ' .')
 
         this.scene = new Scene(canvas, window.innerWidth, window.innerHeight)
-        this.toucher = new Toucher(this.scene)
 
         this.scene.camera.position.x = -30
         this.scene.camera.position.y = 20

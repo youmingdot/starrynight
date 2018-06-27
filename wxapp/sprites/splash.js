@@ -36,4 +36,8 @@ export default class SplashSprite extends Sprite {
             this.way = 0.2
         }
     }
+
+    onTouchMove (pointers, actives) {
+
+    }
 }
