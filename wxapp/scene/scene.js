@@ -40,24 +40,6 @@ export default class Scene {
     }
 
     /**
-     * Add a sprite to the scene.
-     */
-    putSprite (sprite) {
-        this.sprites.push(sprite)
-    }
-
-    /**
-     * Remove the sprite.
-     */
-    removeSprite (sprite) {
-        let index = this.sprites.indexOf(sprite)
-
-        if (index > -1) {
-            this.sprites.splice(index, 1);
-        }
-    }
-
-    /**
      * Update the scene.
      */
     update () {

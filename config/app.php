@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'name' => 'The Starry Night',
+    'name' => 'The Starry Starry Night',
 
     /*
     |--------------------------------------------------------------------------
@@ -133,6 +133,8 @@ return [
         Lawoole\Foundation\Providers\ConsoleSupportServiceProvider::class,
         Lawoole\Foundation\Support\Providers\RouteServiceProvider::class,
         Lawoole\Server\ServerServiceProvider::class,
+
+        App\Movie\MovieServiceProvider::class,
 
     ],
 
