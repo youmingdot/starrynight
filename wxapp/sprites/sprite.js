@@ -1,5 +1,6 @@
 import Toucher from '../scene/toucher'
 
+
 export default class Sprite {
 
     /**

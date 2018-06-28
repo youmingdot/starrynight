@@ -32,7 +32,7 @@ export default class StarryNight {
     /**
      * Looping.
      */
-    loop () {
+    loop (times) {
         this.update()
         this.render()
 
