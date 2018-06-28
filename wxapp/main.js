@@ -1,3 +1,5 @@
+import TWEEN from 'libs/tween'
+
 import Scene from 'scene/scene'
 
 export default class StarryNight {
@@ -26,13 +28,15 @@ export default class StarryNight {
     run () {
         console.log('The Starry Starry Night is running.')
 
-        this.loop()
+        window.requestAnimationFrame(this.looper)
     }
 
     /**
      * Looping.
      */
-    loop (times) {
+    loop (time) {
+        TWEEN.update(time)
+
         this.update()
         this.render()
 
