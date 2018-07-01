@@ -1,6 +1,8 @@
 import TWEEN from '../libs/tween'
 import * as THREE from '../libs/three'
 
+import Toucher from 'toucher'
+
 import SplashSprite from '../sprites/splash'
 import MovieSummarySprite from '../sprites/movie/summary'
 
@@ -23,6 +25,8 @@ export default class StarryNight {
         this.width = window.innerWidth
 
         this.wgl = wx.createCanvas()
+
+        this.toucher = new Toucher(this.canvas)
 
         this.looper = this.loop.bind(this)
 
