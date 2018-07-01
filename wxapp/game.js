@@ -1,6 +1,6 @@
 import 'libs/weapp-adapter'
 import 'libs/symbol'
 
-import StarryNight from 'main'
+import StarryNight from 'game/main'
 
 new StarryNight().run()

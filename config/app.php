@@ -39,7 +39,7 @@ return [
     |
     */
 
-    'environment' => 'production',
+    'env' => 'production',
 
     /*
     |--------------------------------------------------------------------------
@@ -133,8 +133,6 @@ return [
         Lawoole\Foundation\Providers\ConsoleSupportServiceProvider::class,
         Lawoole\Foundation\Support\Providers\RouteServiceProvider::class,
         Lawoole\Server\ServerServiceProvider::class,
-
-        App\Movie\MovieServiceProvider::class,
 
     ],
 

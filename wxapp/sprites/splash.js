@@ -9,7 +9,7 @@ export default class SplashSprite extends Sprite {
 
         let axes = new THREE.AxesHelper(20)
 
-        this.scene.add(axes)
+        this.sn.scene.add(axes)
 
         let plane = new THREE.Mesh(new THREE.PlaneGeometry(60, 20, 1, 1), new THREE.MeshBasicMaterial({color: 0xcccccc}))
 
@@ -20,11 +20,11 @@ export default class SplashSprite extends Sprite {
 
         this.way = 0.2
 
-        this.scene.add(plane)
+        this.sn.scene.add(plane)
 
         this.plane = plane
 
-        this.scene.add(new THREE.AmbientLight(0x000000))
+        this.sn.scene.add(new THREE.AmbientLight(0xFFFFFF))
     }
 
     update () {
@@ -35,9 +35,5 @@ export default class SplashSprite extends Sprite {
         } else if (this.plane.position.x < -30) {
             this.way = 0.2
         }
-    }
-
-    onTouchMove (pointers, actives) {
-
     }
 }

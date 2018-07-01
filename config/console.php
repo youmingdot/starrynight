@@ -14,6 +14,8 @@ return [
 
     'commands' => [
 
+        App\Commands\ImportMovieCommand::class
+
     ],
 
     /*

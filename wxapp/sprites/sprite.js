@@ -1,58 +1,27 @@
-import Toucher from '../scene/toucher'
-
 
 export default class Sprite {
 
-    /**
-     * Create a sprite.
-     */
-    constructor (scene) {
-        this.scene = scene
+    constructor (sn) {
+        this.sn = sn
 
         this.initialize()
-
-        Toucher.instance().listen(this)
     }
 
-    /**
-     * Initialize the sprite.
-     */
     initialize () {
         //
     }
 
     /**
-     * Do updating.
+     * Update the sprite.
      */
     update () {
         //
     }
 
     /**
-     * Called when touch start.
+     * Render the sprite to the screen.
      */
-    onTouchStart (pointers, actives) {
-
-    }
-
-    /**
-     * Called when touch move.
-     */
-    onTouchMove (pointers, actives) {
-
-    }
-
-    /**
-     * Called when touch end.
-     */
-    onTouchEnd (pointers, actives) {
-
-    }
-
-    /**
-     * Called when touch cancel.
-     */
-    onTouchCancel (pointers, actives) {
-
+    render () {
+        //
     }
 }

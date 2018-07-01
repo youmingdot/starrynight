@@ -13,8 +13,15 @@ export default class ViewState {
     }
 
     initialize () {
-        this.page = 'splash'
+        this.name = 'The Starry Starry Night'
+
+        this.initializeMovieSummary()
     }
 
+    initializeMovieSummary () {
+        this.movieSummary = {
+            visible: true
+        }
+    }
 
 }
