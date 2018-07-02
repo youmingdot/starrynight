@@ -20,7 +20,7 @@ export default class ViewState {
 
     initializeMovieSummary () {
         this.movieSummary = {
-            visible: true
+            visible: false
         }
     }
 

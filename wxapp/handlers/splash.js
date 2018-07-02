@@ -12,7 +12,7 @@ class SplashToucher extends Toucher {
 export default class SplashHandler extends Handler {
 
     initialize () {
-        this.toucher = new SplashHandler(this)
+        this.toucher = new SplashToucher(this)
     }
 
 

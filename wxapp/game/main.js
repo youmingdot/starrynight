@@ -4,6 +4,8 @@ import * as THREE from '../libs/three'
 import SplashSprite from '../sprites/splash'
 import MovieSummarySprite from '../sprites/movie/summary'
 
+import SplashHandler from '../handlers/splash'
+
 export default class StarryNight {
 
     constructor () {
@@ -59,7 +61,7 @@ export default class StarryNight {
 
     createHandlers () {
         return {
-
+            splash: new SplashHandler(this)
         }
     }
 
@@ -70,7 +72,7 @@ export default class StarryNight {
 
         this.handler = this.handlers[handler]
 
-        handler.resume()
+        this.handler.resume()
     }
 
     run () {
