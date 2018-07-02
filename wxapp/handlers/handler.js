@@ -1,14 +1,11 @@
-import Hammer from '../libs/hammer'
 
-export default class Toucher {
+export default class Handler {
 
-    constructor (handler) {
-        this.handler = handler
-        this.sn = handler.sn
-
-        this.hammer = new Hammer(this.sn.canvas)
+    constructor (sn) {
+        this.sn = sn
 
         this.effecting = false
+        this.toucher = undefined
 
         this.initialize()
     }
@@ -23,10 +20,14 @@ export default class Toucher {
 
     pause () {
         this.effecting = false
+
+        this.toucher.pause()
     }
 
     resume () {
         this.effecting = true
+
+        this.toucher.resume()
     }
 
 }

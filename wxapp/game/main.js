@@ -1,8 +1,6 @@
 import TWEEN from '../libs/tween'
 import * as THREE from '../libs/three'
 
-import Toucher from 'toucher'
-
 import SplashSprite from '../sprites/splash'
 import MovieSummarySprite from '../sprites/movie/summary'
 
@@ -26,13 +24,12 @@ export default class StarryNight {
 
         this.wgl = wx.createCanvas()
 
-        this.toucher = new Toucher(this.canvas)
-
         this.looper = this.loop.bind(this)
 
         this.createThreeWorld()
 
         this.sprites = this.createSprites()
+        this.handlers = this.createHandlers()
     }
 
     createThreeWorld () {
@@ -58,6 +55,22 @@ export default class StarryNight {
             splash: new SplashSprite(this),
             movieSummary: new MovieSummarySprite(this),
         }
+    }
+
+    createHandlers () {
+        return {
+
+        }
+    }
+
+    setActiveHandler (handler) {
+        if (this.handler) {
+            handler.pause()
+        }
+
+        this.handler = this.handlers[handler]
+
+        handler.resume()
     }
 
     run () {
