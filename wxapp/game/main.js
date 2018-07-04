@@ -104,7 +104,7 @@ export default class StarryNight {
 
     renderSprites () {
         for (let key in this.sprites) {
-            if (this.sprites.hasOwnProperty(key)) {
+            if (this.sprites.hasOwnProperty(key) && this.sprites[key].isVisible()) {
                 this.sprites[key].render()
             }
         }

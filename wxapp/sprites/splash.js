@@ -1,31 +1,32 @@
 import * as THREE from '../libs/three'
 
+import ViewState from '../states/view'
+
 import Sprite from 'sprite'
+
+let viewState = new ViewState()
 
 export default class SplashSprite extends Sprite {
 
     initialize () {
         super.initialize()
 
+        this.ambientLight = new THREE.AmbientLight(0xFFFFFF)
 
 
-        let plane = new THREE.Mesh(new THREE.PlaneGeometry(60, 20, 1, 1), new THREE.MeshBasicMaterial({color: 0xcccccc}))
+    }
 
-        plane.rotation.x = -0.5 * Math.PI
-        plane.position.x = 15
-        plane.position.y = 0
-        plane.position.z = 0
+    show () {
+        this.sn.scene.add(this.ambientLight)
+    }
 
-        this.way = 0.2
-
-        this.sn.scene.add(plane)
-
-        this.plane = plane
-
-        this.sn.scene.add(new THREE.AmbientLight(0xFFFFFF))
+    hide () {
+        this.sn.scene.remove(this.ambientLight)
     }
 
     update () {
-
+        this.setVisible(viewState.splashing)
     }
+
+
 }
