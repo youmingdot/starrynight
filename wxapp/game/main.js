@@ -32,6 +32,8 @@ export default class StarryNight {
 
         this.sprites = this.createSprites()
         this.handlers = this.createHandlers()
+
+        this.setActiveHandler('splash')
     }
 
     createThreeWorld () {
@@ -45,11 +47,8 @@ export default class StarryNight {
         this.renderer.setClearColor(0x000000)
         this.renderer.setSize(this.width, this.height)
 
-        this.camera.position.x = -30
-        this.camera.position.y = 20
-        this.camera.position.z = 20
-
-        this.camera.lookAt(this.scene.position)
+        // Testing
+        this.scene.add(new THREE.AxesHelper(20))
     }
 
     createSprites () {
