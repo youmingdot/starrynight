@@ -6,7 +6,17 @@ export default class Toucher {
         this.handler = handler
         this.sn = handler.sn
 
-        this.hammer = new Hammer(this.sn.canvas)
+        this.hammer = new Hammer(this.sn.canvas, {
+            enable: this.isEffecting.bind(this),
+            recognizers: [
+                [Hammer.Rotate],
+                [Hammer.Pinch],
+                [Hammer.Pan],
+                [Hammer.Tap],
+                [Hammer.Tap, {event: 'doubletap', taps: 2}, ['tap']],
+                [Hammer.Press]
+            ]
+        })
 
         this.effecting = false
 
@@ -21,12 +31,12 @@ export default class Toucher {
         return this.effecting
     }
 
-    pause () {
-        this.effecting = false
-    }
-
     resume () {
         this.effecting = true
+    }
+
+    pause () {
+        this.effecting = false
     }
 
 }

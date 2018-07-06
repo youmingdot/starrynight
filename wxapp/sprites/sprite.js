@@ -15,7 +15,9 @@ export default class Sprite {
 
     setVisible (visible) {
         if (this.visible !== visible) {
-            return this.visible = visible ? this.show() : this.hide()
+            this.visible = visible
+
+            return visible ? this.show() : this.hide()
         }
     }
 

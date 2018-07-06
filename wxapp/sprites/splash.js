@@ -30,27 +30,25 @@ export default class SplashSprite extends Sprite {
         this.lookAt = new THREE.Vector3()
 
         this.initializeCloud()
-
-        let val = this.pl.noise(10, 10, 0)
-
-        console.log(val)
     }
 
     initializeCloud () {
         this.cloudGeometry = new THREE.Geometry()
-        this.cloudMaterial = new THREE.PointCloudMaterial({
+        this.cloudMaterial = new THREE.PointsMaterial({
             size:1, vertexColors:true, color:0xffffff, blending: true,
         })
 
-        for (let x = -5; x <= 5; x++) {
-            for (let y = 10; y <= 20; y++) {
-                let particle = new THREE.Vector3(x * 3, y * 3, Math.random() * - 20);
+        for (let x = -40; x <= 40; x++) {
+            for (let y = -40; y <= 40; y++) {
+                let no = this.pl.noise((x + 40) / 80, (y + 40) / 80, 0) * 100
+
+                let particle = new THREE.Vector3(x * 2, y * -2, no);
                 this.cloudGeometry.vertices.push(particle);
                 this.cloudGeometry.colors.push(new THREE.Color(+randomColor()));
             }
         }
 
-        this.cloud = new THREE.PointCloud(this.cloudGeometry, this.cloudMaterial)
+        this.cloud = new THREE.Points(this.cloudGeometry, this.cloudMaterial)
     }
 
     show () {
@@ -58,8 +56,8 @@ export default class SplashSprite extends Sprite {
         this.sn.scene.add(this.cloud)
 
         this.sn.camera.position.x = 0
-        this.sn.camera.position.y = 50
-        this.sn.camera.position.z = 50
+        this.sn.camera.position.y = -50
+        this.sn.camera.position.z = 70
 
         this.lookAt.x = 0
         this.lookAt.y = 50
