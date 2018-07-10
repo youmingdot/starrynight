@@ -25,7 +25,7 @@ export default class SplashSprite extends Sprite {
 
         this.pl = new Perlin(Math.random())
 
-        this.ambientLight = new THREE.AmbientLight(0xFFFFFF)
+        this.light = new THREE.DirectionalLight(0xffffff)
 
         this.lookAt = new THREE.Vector3()
 
@@ -33,9 +33,12 @@ export default class SplashSprite extends Sprite {
     }
 
     initializeCloud () {
+        let starTexture  = new THREE.TextureLoader().load('./images/star.png');
+
         this.cloudGeometry = new THREE.Geometry()
         this.cloudMaterial = new THREE.PointsMaterial({
-            size:1, vertexColors:true, color:0xffffff, blending: true,
+            size: Math.random() * 4 + 2, map: starTexture, vertexColors: true, color: 0xffffff, blending: THREE.AddEquation,
+            depthTest: false, transparent: true
         })
 
         for (let x = -40; x <= 40; x++) {
@@ -52,7 +55,7 @@ export default class SplashSprite extends Sprite {
     }
 
     show () {
-        this.sn.scene.add(this.ambientLight)
+        this.sn.scene.add(this.light)
         this.sn.scene.add(this.cloud)
 
         this.sn.camera.position.x = 0
@@ -67,12 +70,16 @@ export default class SplashSprite extends Sprite {
     }
 
     hide () {
-        this.sn.scene.remove(this.ambientLight)
+        this.sn.scene.remove(this.light)
         this.sn.scene.remove(this.cloud)
     }
 
-    update () {
+    update (time) {
         this.setVisible(viewState.splashing)
+
+        let material = this.cloud.material
+
+        material.size = 1.5 * ( 2.0 + Math.sin(0.002 * time ) )
     }
 
 }

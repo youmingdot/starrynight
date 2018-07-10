@@ -36,14 +36,14 @@ export default class Sprite {
     /**
      * Update the sprite.
      */
-    update () {
+    update (time) {
         //
     }
 
     /**
      * Render the sprite to the screen.
      */
-    render () {
+    render (time) {
         //
     }
 }

@@ -6,7 +6,7 @@ let viewState = new ViewState()
 
 export default class MovieSummarySprite extends Sprite {
 
-    render () {
+    render (time) {
         if (viewState.movieSummary.visible !== true) {
             return
         }

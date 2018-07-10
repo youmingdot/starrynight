@@ -83,29 +83,29 @@ export default class StarryNight {
     loop (time) {
         TWEEN.update(time)
 
-        this.updateSprites()
+        this.updateSprites(time)
 
         this.renderer.render(this.scene, this.camera)
 
         this.ctx.drawImage(this.wgl, 0, 0)
 
-        this.renderSprites()
+        this.renderSprites(time)
 
         window.requestAnimationFrame(this.looper)
     }
 
-    updateSprites () {
+    updateSprites (time) {
         for (let key in this.sprites) {
             if (this.sprites.hasOwnProperty(key)) {
-                this.sprites[key].update()
+                this.sprites[key].update(time)
             }
         }
     }
 
-    renderSprites () {
+    renderSprites (time) {
         for (let key in this.sprites) {
             if (this.sprites.hasOwnProperty(key) && this.sprites[key].isVisible()) {
-                this.sprites[key].render()
+                this.sprites[key].render(time)
             }
         }
     }
