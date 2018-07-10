@@ -1,4 +1,4 @@
-import Perlin from '../libs/perlin'
+import SimplexNoise from '../libs/simplex'
 import * as THREE from '../libs/three'
 
 import ViewState from '../states/view'
@@ -23,7 +23,7 @@ export default class SplashSprite extends Sprite {
     initialize () {
         super.initialize()
 
-        this.pl = new Perlin(Math.random())
+        this.pl = new SimplexNoise(Math.random)
 
         this.light = new THREE.DirectionalLight(0xffffff)
 
@@ -41,9 +41,9 @@ export default class SplashSprite extends Sprite {
             depthTest: false, transparent: true
         })
 
-        for (let x = -40; x <= 40; x++) {
-            for (let y = -40; y <= 40; y++) {
-                let no = this.pl.noise((x + 40) / 80, (y + 40) / 80, 0) * 100
+        for (let x = -400; x <= 400; x++) {
+            for (let y = -400; y <= 400; y++) {
+                let no = this.pl.noise(x, y, 0) * 100
 
                 let particle = new THREE.Vector3(x * 2, y * -2, no);
                 this.cloudGeometry.vertices.push(particle);
@@ -59,8 +59,8 @@ export default class SplashSprite extends Sprite {
         this.sn.scene.add(this.cloud)
 
         this.sn.camera.position.x = 0
-        this.sn.camera.position.y = -50
-        this.sn.camera.position.z = 70
+        this.sn.camera.position.y = -200
+        this.sn.camera.position.z = 200
 
         this.lookAt.x = 0
         this.lookAt.y = 50
