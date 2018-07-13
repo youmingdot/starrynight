@@ -2,59 +2,14 @@ import Toucher from '../game/toucher'
 import Handler from 'handler'
 
 import ViewState from '../states/view'
+import * as THREE from "../libs/three";
 
 let viewState = new ViewState()
 
 class SplashToucher extends Toucher {
 
     initialize () {
-        this.paning = false
 
-        this.lastPanX = this.lastPanY = 0
-
-        let panOptions = {
-            threshold: 2
-        }
-
-        this.hammer.on('panstart', this.onPanStart.bind(this), panOptions)
-        this.hammer.on('panmove', this.onPanMove.bind(this), panOptions)
-        this.hammer.on('panend', this.onPanEnd.bind(this), panOptions)
-    }
-
-    onPanStart (event) {
-        this.paning = true
-
-        this.lastPanX = event.center.x
-        this.lastPanY = event.center.y
-    }
-
-    onPanMove (event) {
-        this.paning = true
-
-        let dX = event.center.x - this.lastPanX
-        let dY = event.center.y - this.lastPanY
-
-        this.moveCamera(dX, dY)
-
-        this.lastPanX = event.center.x
-        this.lastPanY = event.center.y
-    }
-
-    onPanEnd (event) {
-        this.paning = false
-
-        let dX = event.center.x - this.lastPanX
-        let dY = event.center.y - this.lastPanY
-
-        this.moveCamera(dX, dY)
-
-        this.lastPanX = event.center.x
-        this.lastPanY = event.center.y
-    }
-
-    moveCamera (x, y) {
-        this.sn.camera.position.x -= x
-        this.sn.camera.position.y -= y
     }
 
 }
@@ -62,9 +17,13 @@ class SplashToucher extends Toucher {
 export default class SplashHandler extends Handler {
 
     initialize () {
+        super.initialize()
+
         this.toucher = new SplashToucher(this)
 
         this.loaded = false
+
+        this.lookAt = new THREE.Vector3()
     }
 
     resume () {
@@ -75,6 +34,16 @@ export default class SplashHandler extends Handler {
         }
 
         viewState.splashing = true
+
+        this.sn.camera.position.x = 0
+        this.sn.camera.position.y = 0
+        this.sn.camera.position.z = 0
+
+        this.lookAt.x = 0
+        this.lookAt.y = 100
+        this.lookAt.z = 0
+
+        this.sn.camera.lookAt(this.lookAt)
     }
 
     showStarryRiver () {
