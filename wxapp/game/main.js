@@ -39,7 +39,7 @@ export default class StarryNight {
     createThreeWorld () {
         this.scene = new THREE.Scene()
 
-        this.camera = new THREE.PerspectiveCamera(50, this.width / this.height, 0.1, 2000)
+        this.camera = new THREE.PerspectiveCamera(50, this.width / this.height, 0.1, 5000)
 
         this.scene.add(this.camera)
 

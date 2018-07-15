@@ -16,6 +16,7 @@ export default class ViewState {
         this.name = 'The Starry Starry Night'
 
         this.splashing = false
+        this.treking = false
 
         this.initializeMovieSummary()
     }

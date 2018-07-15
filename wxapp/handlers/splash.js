@@ -40,7 +40,7 @@ export default class SplashHandler extends Handler {
         this.sn.camera.position.z = 0
 
         this.lookAt.x = 0
-        this.lookAt.y = 100
+        this.lookAt.y = 2000
         this.lookAt.z = 0
 
         this.sn.camera.lookAt(this.lookAt)
