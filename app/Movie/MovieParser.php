@@ -1,18 +1,16 @@
 <?php
 namespace App\Movie;
 
+use Illuminate\Support\Str;
+
 class MovieParser
 {
     /**
-     * The console output.
-     *
      * @var \Lawoole\Console\OutputStyle
      */
     protected $output;
 
     /**
-     * Create a movie parser.
-     *
      * @param \Illuminate\Console\OutputStyle $output
      */
     public function __construct($output)
@@ -21,8 +19,6 @@ class MovieParser
     }
 
     /**
-     * Parse movies from the given file.
-     *
      * @param string $path
      *
      * @return \App\Movie\Movie[]
@@ -36,17 +32,20 @@ class MovieParser
         try {
             $buffer = '';
 
+            $sequence = 1;
+
             while (!feof($fp)) {
                 $line = fgets($fp);
 
                 if ($this->isMovieDivider($line)) {
-                    //
-                    $movie = $this->parse($buffer);
+                    if ($movie = $this->parse($buffer)) {
+                        $movie->setId($sequence);
 
-                    if ($movie != null) {
                         $movies[$movie->getId()] = $movie;
 
-                        $this->output->info("Movie loaded: {$movie->getId()} {$movie->getName()}");
+                        $this->output->info("Movie loaded: {$movie->getNo()} {$movie->getName()}");
+
+                        $sequence ++;
                     }
 
                     $buffer = '';
@@ -64,8 +63,6 @@ class MovieParser
     }
 
     /**
-     * Return whether the line is movie divider.
-     *
      * @param string $line
      *
      * @return bool
@@ -76,162 +73,154 @@ class MovieParser
     }
 
     /**
-     * Parse the data to a movie instance.
-     *
      * @param string $data
      *
      * @return \App\Movie\Movie
      */
     public function parse($data)
     {
-        $movie = new Movie;
+        $partions = explode('-----', $data, 5);
 
-        $parts = explode('-----', $data, 5);
-
-        if (count($parts) < 5) {
+        if (count($partions) < 5) {
             return null;
         }
 
-        $this->parseTitle($movie, $parts[0]);
-        $this->parseKeyword($movie, $parts[0]);
-        $this->parseInfo($movie, $parts[0]);
-        $this->parseRank($movie, $parts[0]);
-        $this->parseSummary($movie, $parts[0]);
+        [$title, $keyword, $plane, $rank, $summary] = $partions;
+
+        $title = $this->parseTitle($title);
+        $keywords = $this->parseKeyword($keyword);
+        $planes = $this->parsePlane($plane);
+        $ranks = $this->parseRank($rank);
+        $summary = $this->parseSummary($summary);
+
+        $movie = new Movie;
+
+        $movie->setNo($title['no']);
+        $movie->setName($title['name']);
+        $movie->setKeywords($keywords);
+        $movie->setPanels($planes);
+        $movie->setScore($ranks['score']);
+        $movie->setRanks($ranks['ranks']);
+        $movie->setRankCount($ranks['amount']);
+        $movie->setSummary($summary);
 
         return $movie;
     }
 
     /**
-     * Parse the data.
+     * @param string $title
      *
-     * @param \App\Movie\Movie $movie
-     * @param string $data
+     * @return array
      */
-    protected function parseTitle($movie, $data)
+    protected function parseTitle($title)
     {
-        [$id, $title] = explode(':', $data);
-        [$name, $year] = strpos($title, ',') !== false ? explode(',', $title) : [$title, ''];
+        preg_match('/^(\d+):(.+?),.+$/u', $title, $matches);
 
-        $year = $this->extractArgument('/\((\d+)\)/u', $year);
+        [, $no, $name] = $matches;
 
-        $movie->setId($id);
-        $movie->setName($name);
-        $movie->setYear($year);
+        return compact('no', 'name');
     }
 
     /**
-     * Parse the data.
+     * @param string $keyword
      *
-     * @param \App\Movie\Movie $movie
-     * @param string $data
+     * @return array
      */
-    protected function parseKeyword($movie, $data)
+    protected function parseKeyword($keyword)
     {
-        $keywords = [];
+        preg_match_all('/(.+?),(\d+);/u', $keyword, $matches);
 
-        foreach (explode(';', $data) as $row) {
-            if (strpos($row, ',') === false) {
-                continue;
-            }
+        [, $keywords, $counts] = $matches;
 
-            [$keyword, $amount] = explode(',', $row);
+        $counts = array_map(function ($count) {
+            return (int) $count;
+        }, $counts);
 
-            $keywords[$keyword] = (int) $amount;
-        }
-
-        $movie->setKeywords($keywords);
+        return array_combine($keywords, $counts);
     }
 
     /**
-     * Parse the data.
+     * @param string $plane
      *
-     * @param \App\Movie\Movie $movie
-     * @param string $data
+     * @return array
      */
-    protected function parseInfo($movie, $data)
+    protected function parsePlane($plane)
     {
-        $info = explode("\n", $data);
+        $planes = explode("\n", $plane);
 
-        $info = array_filter($info, function ($info) {
-            return strpos($info, ':') !== false;
-        });
+        $planes = array_map('trim', $planes);
 
-        $info = array_map(function ($info) {
-            return explode(':', $info, 2);
-        }, $info);
-
-        foreach ($info as $item) {
-            [$key, $value] = $item;
-
-            switch ($key) {
-                case '导演':
-                    $movie->setDirectors(array_map('trim', explode('/', $value)));
-                    break;
-                case '编剧':
-                    $movie->setScriptwriters(array_map('trim', explode('/', $value)));
-                    break;
-                case '主演':
-                    $movie->setActors(array_map('trim', explode('/', $value)));
-                    break;
-                case '类型':
-                    $movie->setTypes(array_map('trim', explode('/', $value)));
-                    break;
-                case '语言':
-                    $movie->setLanguages(array_map('trim', explode('/', $value)));
-                    break;
-                case '片长':
-                    $movie->setLength(str_replace('分钟', '', trim($value)));
-                    break;
-            }
-        }
+        return array_values(array_filter($planes));
     }
 
     /**
-     * Parse the data.
+     * @param string $rank
      *
-     * @param \App\Movie\Movie $movie
-     * @param string $data
+     * @return array
      */
-    protected function parseRank($movie, $data)
+    protected function parseRank($rank)
     {
-        $ranks = explode("\n", $data);
+        $ranks = explode("\n", $rank);
 
-        $movie->setScore(trim($ranks[0]));
+        $ranks = array_map('trim', $ranks);
 
-        $rankCount = $this->extractArgument('/(\d+)人评价/u', $ranks[1]);
+        $ranks = array_values(array_filter($ranks));
 
-        $movie->setRankCount($rankCount);
+        $score = (float) array_shift($ranks);
+
+        $amount = $this->extractArguments('/(\d+)/u', array_shift($ranks));
+        $amount = $amount ? $amount[0] : 0;
 
         $ranks = array_map(function ($rank) {
-            return $this->extractArgument('/(\d+)%/u', $rank);
-        }, array_slice($ranks, 2));
+            return (float) $this->extractArguments('/([.\d]+)%/u', $rank)[0];
+        }, $ranks);
 
-        $movie->setRanks($ranks);
+        $ranks = count($ranks) == 5 ? array_combine([5, 4, 3, 2, 1], $ranks) : [5 => 0, 4 => 0, 3 => 0, 2 => 0, 1 => 0];
+
+        return compact('score', 'amount', 'ranks');
     }
 
     /**
-     * Parse the data.
-     *
-     * @param \App\Movie\Movie $movie
-     * @param string $data
-     */
-    protected function parseSummary($movie, $data)
-    {
-
-    }
-
-    /**
-     * Get argument value.
-     *
-     * @param string $pattern
-     * @param string $value
+     * @param string $summary
      *
      * @return string
      */
-    protected function extractArgument($pattern, $value)
+    protected function parseSummary($summary)
     {
-        preg_match($pattern, $value, $matches);
+        $lines = explode("\n", $summary);
 
-        return $matches[1] ?? null;
+        $summary = '';
+
+        foreach ($lines as $line) {
+            $line = trim($line, "\t\n\r");
+
+            if (empty($line)) {
+                continue;
+            }
+
+            if (!Str::startsWith($line, '    ')) {
+                $summary = '';
+                continue;
+            }
+
+            $summary .= trim($line)."\n";
+        }
+
+        return trim($summary);
+    }
+
+    /**
+     * @param string $pattern
+     * @param string $subject
+     *
+     * @return mixed
+     */
+    protected function extractArguments($pattern, $subject)
+    {
+        preg_match($pattern, $subject, $matches);
+
+        array_shift($matches);
+
+        return $matches;
     }
 }

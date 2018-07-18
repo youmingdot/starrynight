@@ -4,9 +4,6 @@ export default class Handler {
     constructor (sn) {
         this.sn = sn
 
-        this.effecting = false
-        this.toucher = undefined
-
         this.initialize()
     }
 
@@ -14,20 +11,12 @@ export default class Handler {
         //
     }
 
-    isEffecting () {
-        return this.effecting
-    }
-
     pause () {
-        this.effecting = false
-
-        this.toucher.pause()
+        //
     }
 
     resume () {
-        this.effecting = true
-
-        this.toucher.resume()
+        //
     }
 
 }

@@ -134,6 +134,8 @@ return [
         Lawoole\Foundation\Support\Providers\RouteServiceProvider::class,
         Lawoole\Server\ServerServiceProvider::class,
 
+        App\Movie\MovieServiceProvider::class
+
     ],
 
     /*

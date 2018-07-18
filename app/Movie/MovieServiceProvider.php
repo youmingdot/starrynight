@@ -6,9 +6,6 @@ use Lawoole\Server\Events\ServerLaunching;
 
 class MovieServiceProvider extends ServiceProvider
 {
-    /**
-     * Register the service.
-     */
     public function register()
     {
         $this->registerParser();
@@ -16,9 +13,6 @@ class MovieServiceProvider extends ServiceProvider
         $this->registerManager();
     }
 
-    /**
-     * Register the movie parser.
-     */
     protected function registerParser()
     {
         $this->app->singleton('movie.parser', function ($app) {
@@ -26,9 +20,6 @@ class MovieServiceProvider extends ServiceProvider
         });
     }
 
-    /**
-     * Register the movie manager.
-     */
     protected function registerManager()
     {
         $this->app->singleton('movie', function ($app) {
@@ -39,8 +30,6 @@ class MovieServiceProvider extends ServiceProvider
     }
 
     /**
-     * Load movies.
-     *
      * @param \App\Movie\MovieParser $parser
      *
      * @return \App\Movie\Movie[]

@@ -1,5 +1,3 @@
-import SimplexNoise from '../libs/simplex'
-import TWEEN from '../libs/tween'
 import * as THREE from '../libs/three'
 
 import ViewState from '../states/view'
@@ -21,8 +19,6 @@ export default class SplashSprite extends Sprite {
 
 
     }
-
-
 
     show () {
         this.sn.scene.add(this.light)

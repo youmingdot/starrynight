@@ -24,6 +24,8 @@ export default class SplashHandler extends Handler {
         this.loaded = false
 
         this.lookAt = new THREE.Vector3()
+
+
     }
 
     resume () {
