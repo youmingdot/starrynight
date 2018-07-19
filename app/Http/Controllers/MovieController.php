@@ -44,4 +44,18 @@ class MovieController extends Controller
 
         return $this->success(['movie' => $movie]);
     }
+
+    /**
+     * @param \Illuminate\Http\Request $request
+     *
+     * @return mixed
+     */
+    public function getMovieGuessQuestion(Request $request)
+    {
+        $movieNo = $request->query('no');
+
+        $question = $this->mMovie->getMovieGuessQuestion($movieNo);
+
+        return $this->success(['question' => $question]);
+    }
 }

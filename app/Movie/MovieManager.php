@@ -146,4 +146,49 @@ class MovieManager implements Gallery
 
         return $this->getMovieDetail($movieId);
     }
+
+    /**
+     * @param string $movieNo
+     *
+     * @return array
+     */
+    public function getMovieGuessQuestion($movieNo = null)
+    {
+        $movieNo = $movieNo ?? array_rand($this->movieNos);
+
+        $movie = $this->getMovieDetailByNo($movieNo);
+
+        $movie = array_only($movie, ['id', 'no', 'name', 'keywords', 'score']);
+
+        $movie['right'] = true;
+
+        $movieIds = array_rand($this->movieNos, 6);
+
+        $choices = [$movie];
+
+        foreach ($movieIds as $movieId) {
+            $m = $this->getMovieDetailByNo($movieId);
+
+            $m = array_only($m, ['id', 'no', 'name', 'keywords', 'score']);
+
+            if ($movie['no'] == $m['no']) {
+                continue;
+            }
+
+            $m['right'] = false;
+
+            $choices[] = $m;
+
+            if (count($choices) >= 4) {
+                break;
+            }
+        }
+
+        shuffle($choices);
+
+        return [
+            'movie' => $movie,
+            'choices' => $choices
+        ];
+    }
 }
