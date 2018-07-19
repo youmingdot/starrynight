@@ -1,14 +1,10 @@
-import SimplexNoise from '../libs/simplex'
-import TWEEN from '../libs/tween'
 import * as THREE from '../libs/three'
 
-import ViewState from '../states/view'
+import {nosie2d} from '../glsls/noise2d'
 
 import Sprite from 'sprite'
 
-let viewState = new ViewState()
-
-const PARTICLE_AMOUNT = 360
+const PARTICLE_AMOUNT = 36000
 
 const SAYS_MIN_SHOW_TIME = 3000
 const SAYS_PARTICLE_AMOUNT = 36000
@@ -28,54 +24,113 @@ export default class SplashSprite extends Sprite {
     initialize () {
         super.initialize()
 
-        this.loader = new THREE.TextureLoader()
+        this.createThreeWorld()
 
+        this.initializeShader()
+
+        this.initializeLight()
+
+        this.initializeCircle()
+
+        //this.initializeSays()
+
+        this.setVisible(true)
+
+        this.camera.position.set(0, -500, 0)
+        this.lookAt.set(0, 500, 0)
+    }
+
+    initializeLight () {
         this.light = new THREE.AmbientLight(0xffffff)
 
-        this.pointTexture = this.loader.load('images/star.png')
+        this.scene.add(this.light)
+    }
 
-        // this.initializeCloud()
+    initializeShader () {
+        let vsScript = `
+            attribute vec3 a_position;
+            varying vec3 v_pos;
+            varying float v_alpha;
+            uniform mat4 u_modelViewMatrix;
+            uniform mat4 u_projectionMatrix;
+            uniform vec2 u_resolution;
+            uniform float u_time;
+            uniform float u_twirl;
+            uniform float u_noise_time;
+            
+            ${nosie2d}
+            
+            float clampNorm(float val, float min, float max) {
+                return clamp((val - min) / (max - min), 0.0, 1.0);
+            }
+            
+            const float PI = 3.14159265358979323846264;
+            
+            void main(void) {
+                gl_PointSize = 2.0;
+                vec3 pos = a_position;
+                float index = pos.z;
+                pos.z = 0.0;
+                v_alpha = 1.0;
+            
+                // 9 groups
+                float group = mod(floor(index / 360.0), 9.0);
+            
+                float angle = index / 180.0 * PI;
+                float radius = 300.0 + floor(index / 360.0) * 3.0;
+                float toCenter = clamp(radius / 600.0, 0.0, 1.0);
+            
+                vec3 basePos = pos;
+                basePos.x = sin(angle) * radius;
+                basePos.y = cos(angle) * radius;
+            
+                angle += u_time * (1.0 + group * .1) * 0.015;
+            
+                angle += u_twirl * pow(sin(angle * (1.0 - u_twirl * 0.01)), 3.0) * 0.7;
+            
+                pos.x = sin(angle) * radius;
+                pos.y = cos(angle) * radius;
+            
+                vec3 finalPos = pos;
+            
+                finalPos.x = pos.x + snoise(basePos.xy * 1. + u_noise_time * .03 ) * 50.0;
+                finalPos.y = pos.y + snoise(basePos.xy * 1. + u_noise_time * .03 + 3.0 ) * 50.0;
+            
+                v_alpha = toCenter - (sin(pow(toCenter, 1.2) * 60.0) + 1.0) / 2.0 * 0.5;
+            
+                finalPos.x /= u_resolution.x;
+                finalPos.y /= u_resolution.y;
+                v_pos = finalPos;
+                gl_Position = u_projectionMatrix * u_modelViewMatrix * vec4(finalPos, 1.0);
+            }
+        `
 
-        this.initializeSays()
+        let fsScript = `
+            precision highp float;
+            varying vec3 v_pos;
+            varying float v_alpha;
+            
+            void main(void) {
+                float len = length(gl_PointCoord.xy - .5) * 2.0;
+                float c = 1.0 - len;
+                gl_FragColor = vec4(c, c, c, v_alpha);
+            }
+        `
+
+        this.createShaderProgram(vsScript, fsScript)
+
+        this.shaderParams = {
+            aPosition: this.context.getAttribLocation(this.shaderProgram, 'a_position'),
+            uTime: this.context.getUniformLocation(this.shaderProgram, 'u_time')
+        }
+
+        this.context.enableVertexAttribArray(this.shaderParams.aPosition);
+
+        this.context.vertexAttribPointer(this.shaderParams.aPosition, 3, this.context.FLOAT, false, 0, 0);
     }
 
     initializeSays () {
-        let geometry = new THREE.Geometry()
 
-        let material = new THREE.PointsMaterial({
-            size: 20,
-            sizeAttenuation: true,
-            map: this.pointTexture,
-            vertexColors: true,
-            blending: THREE.AddEquation,
-            alphaTest: 0.2,
-            depthTest: false,
-            transparent: true,
-            opacity: 0.1
-        })
-
-        material.tween = new TWEEN.Tween(material)
-
-        for (let i = 0; i < SAYS_PARTICLE_AMOUNT; i ++) {
-            let particleX = Math.random() * 800 - 400
-            let particleZ = Math.random() * 800 - 400
-            let particleY = 200 + Math.random() * 400
-
-            let particle = new THREE.Vector3(particleX, particleY, particleZ)
-
-            particle.tween = new TWEEN.Tween(particle)
-
-            geometry.vertices.push(particle)
-            geometry.colors.push(new THREE.Color(0xffffff))
-        }
-
-        let points = new THREE.Points(geometry, material)
-
-        this.saysCloud = {
-            geometry: geometry,
-            material: material,
-            points: points
-        }
 
         this.startSaying(0)
     }
@@ -89,30 +144,7 @@ export default class SplashSprite extends Sprite {
     }
 
     showSaying (image) {
-        this.sayingStartTime = this.sayingStartTime !== undefined ? this.sayingStartTime : Date.now() - SAYS_MIN_SHOW_TIME
 
-        let sayingShowTime = Date.now() - SAYS_MIN_SHOW_TIME
-
-        if (sayingShowTime < SAYS_MIN_SHOW_TIME) {
-            return this.showSayingDelay(image, SAYS_MIN_SHOW_TIME - sayingShowTime)
-        }
-
-        image = image.image
-
-        let scaleRatio = Math.min(image.width / window.innerWidth, image.height / window.innerHeight)
-
-        let imageCanvas = wx.createCanvas()
-
-        imageCanvas.width = Math.floor(scaleRatio * image.width)
-        imageCanvas.height = Math.floor(scaleRatio * image.height)
-
-        let canvasCtx = imageCanvas.getContext('2d')
-
-        canvasCtx.drawImage(image, 0, 0, imageCanvas.width, imageCanvas.height)
-
-        let pixels = canvasCtx.getImageData(0, 0, imageCanvas.width, imageCanvas.height).data
-
-        this.moveSayingPoints(pixels, imageCanvas.width, imageCanvas.height)
     }
 
     showSayingDelay (image, delay) {
@@ -123,131 +155,42 @@ export default class SplashSprite extends Sprite {
         }, delay)
     }
 
-    getVisiblePixelCount (pixels, width, height) {
-        let count = 0
+    initializeCircle () {
+        let bufferData = new Float32Array(PARTICLE_AMOUNT * 3)
 
-        for (let x = 0; x < width; x ++) {
-            for (let y = 0; y < height; y ++) {
-                if (this.isVisiblePixel(pixels, x, y, width)) {
-                    count += 1
-                }
-            }
-        }
-
-        return count
-    }
-
-    moveSayingPoints (pixels, width, height) {
-        let visiblePixelCount = this.getVisiblePixelCount(pixels, width, height)
-
-        let vertices = this.saysCloud.geometry.vertices
-        let colors = this.saysCloud.geometry.colors
-
-        let pixelNo = 0
-
-        for (let x = 0; x < width; x ++) {
-            for (let y = 0; y < height; y ++) {
-                let visibleColor = this.isVisiblePixel(pixels, x, y, width)
-
-                if (visibleColor) {
-                    let startParticleNo = Math.floor(vertices.length * pixelNo / visiblePixelCount)
-                    let endParticleNo = Math.floor(vertices.length * (pixelNo + 1) / visiblePixelCount)
-
-                    endParticleNo = Math.min(vertices.length - 1, endParticleNo)
-
-                    for (let i = startParticleNo; i <= endParticleNo; i ++) {
-                        //colors[i].set(visibleColor)
-                        vertices[i].tween.to({
-                            x: (- width / 2 + x + Math.random()) * SAYS_IMAGE_DENSITY,
-                            y: 1500,
-                            z: (height / 2 - y + Math.random()) * SAYS_IMAGE_DENSITY
-                        }, 2000).start()
-                    }
-
-                    pixelNo ++
-                }
-            }
-        }
-
-        this.saysCloud.material.tween.to({
-            opacity: 1
-        }, 2000).start()
-    }
-
-    isVisiblePixel (pixels, posX, posY, width) {
-        let pos = posY * width * 4 + posX * 4
-
-        if (pixels[pos + 3] > 0) {
-            return (pixels[pos] << 16) + (pixels[pos + 1] << 8) + pixels[pos + 2]
-        }
-
-        return 0
-    }
-
-    initializeCloud () {
         let geometry = new THREE.Geometry()
 
-        // let material = new THREE.PointsMaterial({
-        //     size: IMAGE_DENSITY * 4,
-        //     sizeAttenuation: true,
-        //     map: pointTexture,
-        //     vertexColors: true,
-        //     blending: THREE.AddEquation,
-        //     depthTest: false,
-        //     transparent: true,
-        //     opacity: 0.7
-        // })
-        //
-        // for (let i = 0; i < PARTICLE_AMOUNT; i ++) {
-        //     let particleX = Math.random() * 300 - 150
-        //     let particleY = 100 + Math.random() * 1000
-        //     let particleZ = - Math.random() * 300 - 100
-        //
-        //     let particle = new THREE.Vector3(particleX, particleY, particleZ)
-        //
-        //     // particle.baseX = particleX
-        //     // particle.baseY = particleY
-        //     // particle.baseZ = particleZ
-        //     //
-        //     // particle.velocityX = Math.random() * 0.01 - 0.005
-        //     // particle.velocityY = Math.random() * 0.01 - 0.005
-        //     // particle.velocityZ = Math.random() * 0.01 + 0.005
-        //
-        //     geometry.vertices.push(particle)
-        //     geometry.colors.push(new THREE.Color(0xffffff))
-        // }
-        //
-        // let points = new THREE.Points(geometry, material)
-        //
-        // this.cloud = {
-        //     geometry: geometry,
-        //     material: material,
-        //     points: points
-        // }
-    }
+        let material = new THREE.PointsMaterial({
+            size: 10,
+            sizeAttenuation: true,
+            vertexColors: true,
+            blending: THREE.AddEquation,
+            depthTest: false,
+            transparent: true
+        })
 
-    show () {
-        this.sn.scene.add(this.light)
-        this.sn.scene.add(this.saysCloud.points)
-    }
+        for (let i = 0; i < PARTICLE_AMOUNT; i ++) {
+            geometry.vertices.push(new THREE.Vector3(i, 0, 0))
 
-    hide () {
-        this.sn.scene.remove(this.light)
-        this.sn.scene.remove(this.saysCloud.points)
+            bufferData.set([i], i * 3)
+        }
+
+        let points = new THREE.Points(geometry, material)
+
+        this.circleCloud = {
+            geometry: geometry,
+            material: material,
+            points: points
+        }
+
+        this.scene.add(this.circleCloud.points)
+
+        this.context.bindBuffer(this.context.ARRAY_BUFFER, this.context.createBuffer())
+        this.context.bufferData(this.context.ARRAY_BUFFER, bufferData, this.context.STATIC_DRAW)
     }
 
     update (time) {
-        let lastTime = this.lastTime !== undefined ? this.lastTime : time
 
-        let useTime = time - lastTime
-
-        this.setVisible(viewState.splashing)
-
-        if (this.isVisible()) {
-            this.updateClouds(time, useTime)
-        }
-
-        this.lastTime = time
     }
 
     updateClouds (time, useTime) {

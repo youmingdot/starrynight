@@ -1,6 +1,6 @@
-import canvas from '../libs/weapp-adapter'
-
 import TWEEN from '../libs/tween'
+
+import SplashSprite from "../sprites/splash";
 
 export default class StarryNight {
 
@@ -19,7 +19,9 @@ export default class StarryNight {
 
         this.looper = this.loop.bind(this)
 
-        this.sprites = {}
+        this.sprites = [
+            new SplashSprite(this)
+        ]
     }
 
     run () {
@@ -56,12 +58,12 @@ export default class StarryNight {
         let sprites = this.sprites
 
         sprites.sort(function (a, b) {
-            return a.getZIndex() - b.getZIndex()
+            return a.getStackOrder() - b.getStackOrder()
         })
 
         for (let key in sprites) {
             if (this.sprites.hasOwnProperty(key) && this.sprites[key].isVisible()) {
-                this.sprites[key].render(this.canvas, time)
+                this.sprites[key].render(this.canvas, this.context, time)
             }
         }
     }
@@ -75,6 +77,4 @@ export default class StarryNight {
 
         this.handler.start()
     }
-
-
 }
