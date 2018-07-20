@@ -1,5 +1,4 @@
 import TWEEN from '../libs/tween'
-
 import SplashSprite from "../sprites/splash";
 
 export default class StarryNight {
@@ -20,7 +19,8 @@ export default class StarryNight {
         this.looper = this.loop.bind(this)
 
         this.sprites = [
-            new SplashSprite(this)
+            //new SeaSprite(this),
+            new SplashSprite(this),
         ]
     }
 
@@ -55,6 +55,8 @@ export default class StarryNight {
     }
 
     renderSprites (time) {
+        this.context.clearRect(0, 0, this.width, this.height)
+
         let sprites = this.sprites
 
         sprites.sort(function (a, b) {

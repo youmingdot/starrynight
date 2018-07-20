@@ -31,39 +31,13 @@ export default class Sprite {
 
         this.scene.add(this.camera)
 
-        this.renderer = new THREE.WebGLRenderer({ context: this.context, antialias: true })
-        this.renderer.setClearColor(0x000000)
+        this.renderer = new THREE.WebGLRenderer({ context: this.context, antialias: true, alpha: true })
+        this.renderer.setClearColor(0x000000, 0)
         this.renderer.setSize(this.showWidth, this.showHeight)
 
-        this.lookAt = new THREE.Vector3()
-
-        this.camera.lookAt(this.lookAt)
+        this.scene.add(new THREE.AxesHelper(20))
 
         this.camera.position.set(0, 0, 0)
-    }
-
-    createShader (shaderType, script) {
-        let shader = this.context.createShader(shaderType)
-
-        this.context.shaderSource(shader, script)
-
-        this.context.compileShader(shader)
-
-        return shader
-    }
-
-    createShaderProgram (vsScript, fsScript) {
-        let program = this.context.createProgram()
-
-        this.vsShader = this.createShader(this.context.VERTEX_SHADER, vsScript)
-        this.fsShader = this.createShader(this.context.FRAGMENT_SHADER, fsScript)
-
-        this.context.attachShader(program, this.vsShader)
-        this.context.attachShader(program, this.fsShader)
-
-        this.context.linkProgram(program)
-
-        this.shaderProgram = program
     }
 
     isVisible () {
