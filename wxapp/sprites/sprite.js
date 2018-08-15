@@ -35,8 +35,6 @@ export default class Sprite {
         this.renderer.setClearColor(0x000000, 0)
         this.renderer.setSize(this.showWidth, this.showHeight)
 
-        this.scene.add(new THREE.AxesHelper(20))
-
         this.camera.position.set(0, 0, 0)
     }
 

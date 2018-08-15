@@ -18534,7 +18534,7 @@
 
         function makePowerOfTwo( image ) {
 
-            if ( image instanceof HTMLImageElement || image instanceof HTMLCanvasElement || image instanceof ImageBitmap ) {
+            if ( image instanceof HTMLImageElement || image instanceof HTMLCanvasElement ) {
 
                 var canvas = document.createElement( 'canvas' );
                 canvas.width = _Math.floorPowerOfTwo( image.width );

@@ -1,5 +1,6 @@
 import TWEEN from '../libs/tween'
 
+import SplashHandler from '../handlers/splash'
 import TrekHandler from '../handlers/trek'
 
 export default class StarryNight {
@@ -19,7 +20,7 @@ export default class StarryNight {
 
         this.looper = this.loop.bind(this)
 
-        this.setHandler(new TrekHandler(this))
+        this.setHandler(new SplashHandler(this))
     }
 
     run () {
