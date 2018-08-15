@@ -27,7 +27,7 @@ export default class Sprite {
 
         this.scene = new THREE.Scene()
 
-        this.camera = new THREE.PerspectiveCamera(50, this.showWidth / this.showHeight, 0.1, 2000)
+        this.camera = new THREE.PerspectiveCamera(100, this.showWidth / this.showHeight, 1, 3000)
 
         this.scene.add(this.camera)
 

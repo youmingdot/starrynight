@@ -1,10 +1,8 @@
 import Toucher from '../game/toucher'
 import Handler from 'handler'
 
-import ViewState from '../states/view'
-import * as THREE from "../libs/three";
-
-let viewState = new ViewState()
+import SeaSprite from '../sprites/sea'
+import StarrySprite from '../sprites/starry'
 
 class TrekToucher extends Toucher {
 
@@ -54,8 +52,7 @@ class TrekToucher extends Toucher {
     }
 
     moveCamera (x, y) {
-        this.sn.camera.position.x -= x
-        this.sn.camera.position.y -= y
+        this.handler.starry.move(-x * 0.05, y * 0.05)
     }
 
 }
@@ -65,52 +62,23 @@ export default class TrekHandler extends Handler {
     initialize () {
         this.toucher = new TrekToucher(this)
 
-        this.loaded = false
+        this.starry = new StarrySprite(this.sn)
 
-        this.lookAt = new THREE.Vector3()
+        this.sn.sprites = [
+            this.starry
+        ]
+    }
 
-        let program = this.sn.wglCtx.createProgram()
+    pause () {
+        super.pause()
 
-        let shader = this.sn.wglCtx.createShader(this.sn.wglCtx.VERTEX_SHADER)
-
-        this.sn.wglCtx.shaderSource(shader, `
-            attribute vec3 a_position;
-            uniform mat4 u_modelViewMatrix;
-            uniform mat4 u_projectionMatrix;
-            uniform vec2 u_resolution;
-            
-            const float PI = 3.14159265358979323846264;
-            
-            void main(void) {
-                gl_PointSize = 256.0;
-                vec3 pos = a_position;
-                pos.x /= u_resolution.x;
-                pos.y /= u_resolution.y;
-                gl_Position = u_projectionMatrix * u_modelViewMatrix * vec4(pos, 1.0);
-            }
-        `);
-
-        this.sn.wglCtx.compileShader(shader);
-
-        this.sn.wglCtx.attachShader(program, shader);
-
-        debugger
+        this.toucher.pause()
     }
 
     resume () {
         super.resume()
 
-        viewState.treking = true
-
-        this.sn.camera.position.x = 0
-        this.sn.camera.position.y = 0
-        this.sn.camera.position.z = 0
-
-        this.lookAt.x = 0
-        this.lookAt.y = 2000
-        this.lookAt.z = 0
-
-        this.sn.camera.lookAt(this.lookAt)
+        this.toucher.resume()
     }
 
     showStarryRiver () {

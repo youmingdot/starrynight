@@ -1,5 +1,6 @@
 import TWEEN from '../libs/tween'
-import SplashSprite from "../sprites/splash";
+
+import TrekHandler from '../handlers/trek'
 
 export default class StarryNight {
 
@@ -18,10 +19,7 @@ export default class StarryNight {
 
         this.looper = this.loop.bind(this)
 
-        this.sprites = [
-            //new SeaSprite(this),
-            new SplashSprite(this),
-        ]
+        this.setHandler(new TrekHandler(this))
     }
 
     run () {
@@ -33,17 +31,11 @@ export default class StarryNight {
     loop (time) {
         TWEEN.update(time)
 
-        this.updateHandler(time)
-
         this.updateSprites(time)
 
         this.renderSprites(time)
 
         window.requestAnimationFrame(this.looper)
-    }
-
-    updateHandler (time) {
-
     }
 
     updateSprites (time) {
@@ -55,7 +47,7 @@ export default class StarryNight {
     }
 
     renderSprites (time) {
-        this.context.clearRect(0, 0, this.width, this.height)
+        this.renderBackground()
 
         let sprites = this.sprites
 
@@ -70,13 +62,19 @@ export default class StarryNight {
         }
     }
 
+    renderBackground () {
+        this.context.rect(0, 0, this.width, this.height)
+        this.context.fillStyle = '#0f0f0f'
+        this.context.fill()
+    }
+
     setHandler (handler) {
         if (this.handler) {
-            this.handler.stop()
+            this.handler.pause()
         }
 
         this.handler = handler
 
-        this.handler.start()
+        this.handler.resume()
     }
 }

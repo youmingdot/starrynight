@@ -6297,6 +6297,8 @@
 
     var shadow_vert = "#include <fog_pars_vertex>\n#include <shadowmap_pars_vertex>\nvoid main() {\n\t#include <begin_vertex>\n\t#include <project_vertex>\n\t#include <worldpos_vertex>\n\t#include <shadowmap_vertex>\n\t#include <fog_vertex>\n}\n";
 
+    var snoise2d = "vec3 mod289(vec3 x) {\nreturn x - floor(x * (1.0 / 289.0)) * 289.0;\n}\n\nvec2 mod289(vec2 x) {\nreturn x - floor(x * (1.0 / 289.0)) * 289.0;\n}\n\nvec3 permute(vec3 x) {\nreturn mod289(((x*34.0)+1.0)*x);\n}\n\nfloat snoise(vec2 v) {\nconst vec4 C = vec4(0.211324865405187, 0.366025403784439, -0.577350269189626, 0.024390243902439);\n\nvec2 i  = floor(v + dot(v, C.yy) );\nvec2 x0 = v - i + dot(i, C.xx);\n\nvec2 i1;\ni1 = (x0.x > x0.y) ? vec2(1.0, 0.0) : vec2(0.0, 1.0);\nvec4 x12 = x0.xyxy + C.xxzz;\nx12.xy -= i1;\n\ni = mod289(i);\nvec3 p = permute( permute( i.y + vec3(0.0, i1.y, 1.0 )) + i.x + vec3(0.0, i1.x, 1.0 ));\n\nvec3 m = max(0.5 - vec3(dot(x0,x0), dot(x12.xy,x12.xy), dot(x12.zw,x12.zw)), 0.0);\nm = m*m ;\nm = m*m ;\n\nvec3 x = 2.0 * fract(p * C.www) - 1.0;\nvec3 h = abs(x) - 0.5;\nvec3 ox = floor(x + 0.5);\nvec3 a0 = x - ox;\n\nm *= 1.79284291400159 - 0.85373472095314 * ( a0*a0 + h*h );\n\nvec3 g;\ng.x  = a0.x  * x0.x  + h.x  * x0.y;\ng.yz = a0.yz * x12.xz + h.yz * x12.yw;\nreturn 130.0 * dot(m, g);\n}\n";
+    
     var ShaderChunk = {
         alphamap_fragment: alphamap_fragment,
         alphamap_pars_fragment: alphamap_pars_fragment,
@@ -6407,7 +6409,9 @@
         points_frag: points_frag,
         points_vert: points_vert,
         shadow_frag: shadow_frag,
-        shadow_vert: shadow_vert
+        shadow_vert: shadow_vert,
+
+        snoise2d: snoise2d,
     };
 
     /**
