@@ -1,5 +1,6 @@
 import SimplexNoise from '../libs/simplex'
 import * as THREE from '../libs/three'
+import TWEEN from '../libs/tween'
 
 import Sprite from 'sprite'
 
@@ -51,6 +52,8 @@ export default class StarrySprite extends Sprite {
 
         this.camera.up.set(0, 1, 0)
         this.camera.lookAt(-121, 110, 6)
+
+        this.entryStarry()
     }
 
     initializeCloud () {
@@ -177,7 +180,7 @@ export default class StarrySprite extends Sprite {
             uColorMapScale: { type: 'f', value: 1 },
             uTime: { type: 'f', value: 0 },
             uZoom: { type: 'f', value: 0 },
-            uFading: { type: 'f', value: 0.9 },
+            uFading: { type: 'f', value: 0 },
             uPosOffset: { type: 'v3', value: new THREE.Vector3(offsetX, 0, offsetZ) },
             uPosFieldOffset: { type: 'v3', value: new THREE.Vector3(offsetX, 0, offsetZ) },
             uCameraVector: { type: 'v3', value: new THREE.Vector3(0, 0, 0) },
@@ -206,6 +209,16 @@ export default class StarrySprite extends Sprite {
             uniforms: uniforms
         }
     }
+
+    entryStarry () {
+        for (let i = 0; i < this.clouds.length; i ++) {
+            new TWEEN.Tween(this.clouds[i].uniforms.uFading)
+                .to({ value: 1 }, 3000)
+                .delay(500)
+                .easing(TWEEN.Easing.Quadratic.In)
+                .start()
+        }
+    }
     
     move (x, y) {
         
@@ -216,5 +229,4 @@ export default class StarrySprite extends Sprite {
             this.clouds[i].uniforms.uTime.value = time
         }
     }
-
 }

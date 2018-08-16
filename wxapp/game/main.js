@@ -2,6 +2,7 @@ import TWEEN from '../libs/tween'
 
 import SplashHandler from '../handlers/splash'
 import TrekHandler from '../handlers/trek'
+import SummaryHandler from '../handlers/summary'
 
 export default class StarryNight {
 
@@ -10,6 +11,9 @@ export default class StarryNight {
     }
 
     initialize () {
+        this.baseTime = 0
+        this.lastTime = undefined
+
         this.canvas = canvas
         this.context = this.canvas.getContext('2d')
 
@@ -20,7 +24,13 @@ export default class StarryNight {
 
         this.looper = this.loop.bind(this)
 
-        this.setHandler(new SplashHandler(this))
+        this.sprites = {}
+
+        let handler = new SummaryHandler(this)
+
+        this.setHandler(handler)
+
+        handler.showMovie(105)
     }
 
     run () {
@@ -30,11 +40,15 @@ export default class StarryNight {
     }
 
     loop (time) {
-        TWEEN.update(time)
+        this.baseTime += this.lastTime !== undefined ? time - this.lastTime : 0
 
-        this.updateSprites(time)
+        TWEEN.update(this.baseTime)
 
-        this.renderSprites(time)
+        this.updateSprites(this.baseTime)
+
+        this.renderSprites(this.baseTime)
+
+        this.lastTime = time
 
         window.requestAnimationFrame(this.looper)
     }
@@ -50,22 +64,26 @@ export default class StarryNight {
     renderSprites (time) {
         this.renderBackground()
 
-        let sprites = this.sprites
+        let sprites = []
+
+        for (let key in this.sprites) {
+            if (this.sprites.hasOwnProperty(key)) {
+                sprites.push(this.sprites[key])
+            }
+        }
 
         sprites.sort(function (a, b) {
             return a.getStackOrder() - b.getStackOrder()
         })
 
-        for (let key in sprites) {
-            if (this.sprites.hasOwnProperty(key) && this.sprites[key].isVisible()) {
-                this.sprites[key].render(this.canvas, this.context, time)
-            }
+        for (let i = 0; i < sprites.length; i++) {
+            sprites[i].render(this.canvas, this.context, time)
         }
     }
 
     renderBackground () {
         this.context.rect(0, 0, this.width, this.height)
-        this.context.fillStyle = '#0f0f0f'
+        this.context.fillStyle = '#1e1e1e'
         this.context.fill()
     }
 

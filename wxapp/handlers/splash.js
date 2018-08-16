@@ -18,24 +18,12 @@ export default class SplashHandler extends Handler {
 
         this.toucher = new SplashToucher(this)
 
-        this.loaded = false
-
         this.splash = new SplashSprite(this.sn)
 
-        this.sn.sprites = [
-            this.splash
-        ]
+        this.sn.sprites.splash = this.splash
     }
 
-    resume () {
-        super.resume()
-
-        if (this.loaded) {
-            return this.showStarryRiver()
-        }
-    }
-
-    showStarryRiver () {
-
+    showStarry () {
+        
     }
 }

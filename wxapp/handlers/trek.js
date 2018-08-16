@@ -1,7 +1,6 @@
 import Toucher from '../game/toucher'
 import Handler from 'handler'
 
-import SeaSprite from '../sprites/sea'
 import StarrySprite from '../sprites/starry'
 
 class TrekToucher extends Toucher {
@@ -64,9 +63,7 @@ export default class TrekHandler extends Handler {
 
         this.starry = new StarrySprite(this.sn)
 
-        this.sn.sprites = [
-            this.starry
-        ]
+        this.sn.sprites.starry = this.starry
     }
 
     pause () {

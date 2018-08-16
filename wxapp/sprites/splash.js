@@ -1,21 +1,18 @@
 import * as THREE from '../libs/three'
 import TWEEN from '../libs/tween'
 
+import TrekHandler from '../handlers/trek'
+
 import Sprite from 'sprite'
 
-const PARTICLE_AMOUNT = 3600
-const PARTICLE_NOISE_SPEED = 0.2
-
-const SAYS_MIN_SHOW_TIME = 3000
-const SAYS_PARTICLE_AMOUNT = 36000
-const SAYS_IMAGE_DENSITY = 8
+const SAYS_SIZE = 56
 
 const SAYS_IMAGES = [
-    {image: 'images/splash-says-1.png', width: 178, height: 35},
-    {image: 'images/splash-says-2.png', width: 176, height: 35},
-    {image: 'images/splash-says-3.png', width: 142, height: 35},
-    {image: 'images/splash-says-4.png', width: 141, height: 35},
-    {image: 'images/splash-says-5.png', width: 94, height: 47},
+    '愿你的微光',
+    '能够闪烁出',
+    '这夏夜里',
+    '最微小的',
+    '美梦'
 ]
 
 export default class SplashSprite extends Sprite {
@@ -23,78 +20,103 @@ export default class SplashSprite extends Sprite {
     initialize () {
         super.initialize()
 
-        this.createThreeWorld()
-
-		this.scene.add(new THREE.AmbientLight(0xfefefe))
+        this.stackOrder = 9
 
         this.initializeSays()
 
         this.setVisible(true)
 
-        this.camera.position.set(50, 50, 50)
-
-        this.camera.lookAt(0, 30, 0)
-
-        // this.startSaying(0)
+        this.startSaying()
     }
 
     initializeSays () {
-        let loader = new THREE.TextureLoader()
-
-        this.says = []
+        this.sayings = []
 
         for (let i = 0; i < SAYS_IMAGES.length; i++) {
-            let texture = loader.load(SAYS_IMAGES[i].image)
-
-            texture.minFilter = THREE.LinearFilter
-
-            let material = new THREE.SpriteMaterial({
-                map: texture,
-                transparent: true,
-                opacity: 0
-            })
-
-            let sprite = new THREE.Sprite(material)
-
-            this.says[i] = {
-                texture: texture,
-                material: material,
-                sprite: sprite
+            this.sayings[i] = {
+                y: this.sn.width / 2,
+                alpha: 0
             }
-            
-            material.tween = new TWEEN.Tween(material)
-
-            sprite.scale.set(SAYS_IMAGES[i].width * .2, SAYS_IMAGES[i].height * .2, 40)
-            sprite.position.set(0, 0, 0)
-
-            sprite.position.tween = new TWEEN.Tween(sprite.position)
-
-            this.scene.add(sprite)
-        }
-
-    }
-
-    showSaying (image) {
-
-    }
-
-    showSayingDelay (image, delay) {
-        let splash = this
-
-        setTimeout(function () {
-            splash.showSaying(image)
-        }, delay)
-    }
-
-    update (time) {
-        if (this.says[0].start == undefined) {
-            this.says[0].start = true
-            this.says[0].material.tween.to({ opacity: 1 }, 20000)
-            this.says[0].material.tween.start()
-
-            this.says[0].sprite.position.tween.to({ y: 50 }, 10000)
-            this.says[0].sprite.position.tween.start()
         }
     }
 
+    drawSay (say, size, alpha) {
+        let canvas = wx.createCanvas()
+
+        canvas.width = this.sn.width * 2
+        canvas.height = size * 2.8
+
+        let context = canvas.getContext('2d')
+
+        // context.imageSmoothingQuality = 'high'
+        
+        context.beginPath()
+        context.font = `${size}px Arial`
+        context.fillStyle = `rgba(255, 255, 255, ${alpha})`
+
+        let measure = context.measureText(say)
+
+        context.fillText(say, canvas.width / 2 - measure.width / 2, size)
+        context.fill()
+        context.stroke()
+
+        return canvas
+    }
+
+    startSaying () {
+        for (let i = 0; i < SAYS_IMAGES.length; i++) {
+            this.sayings[i].y = this.sn.width * 3 / 5 + this.sn.width / 6
+            this.sayings[i].alpha = 0
+
+            let showTween = new TWEEN.Tween(this.sayings[i])
+                .to({ y: this.sn.width * 3 / 5, alpha: 1 }, 1500)
+                .delay(i * 2500 + 2500)
+                .easing(TWEEN.Easing.Quadratic.Out)
+
+            let hideTween = new TWEEN.Tween(this.sayings[i])
+
+            if (i < SAYS_IMAGES.length - 1) {
+                hideTween.to({ y: this.sn.width * 3 / 5 - this.sn.width / 6, alpha: 0 }, 1500)
+                    .delay(500)
+                    .easing(TWEEN.Easing.Quadratic.In)
+
+                if (i == SAYS_IMAGES.length - 2) {
+                    hideTween.onStart(this.showStarry.bind(this))
+                }
+            } else {
+                hideTween.to({ alpha: 0 }, 2500)
+                    .delay(500)
+                    .easing(TWEEN.Easing.Quadratic.In)
+                    .onComplete(this.hideSplash.bind(this))
+            }
+
+            showTween.chain(hideTween)
+
+            showTween.start()
+        }
+    }
+
+    showStarry () {
+        this.sn.setHandler(new TrekHandler(this.sn))
+    }
+
+    hideSplash () {
+        delete this.sn.sprites.splash
+    }
+
+    render (canvas, context, time) {
+        super.render(canvas, context, time)
+
+        for (let i = 0; i < SAYS_IMAGES.length; i++) {
+            let saying = this.sayings[i]
+
+            if (saying.alpha <= 0) {
+                continue
+            }
+
+            let sayCanvas = this.drawSay(SAYS_IMAGES[i], SAYS_SIZE, saying.alpha)
+
+            context.drawImage(sayCanvas, 0, saying.y, sayCanvas.width / 2, sayCanvas.height / 2)
+        }
+    }
 }

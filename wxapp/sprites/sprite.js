@@ -5,6 +5,10 @@ export default class Sprite {
     constructor (sn) {
         this.sn = sn
 
+        this.initialize()
+    }
+
+    initialize () {
         this.canvas = wx.createCanvas()
 
         this.visible = false
@@ -14,12 +18,6 @@ export default class Sprite {
         this.showTop = 0
         this.showWidth = this.sn.width
         this.showHeight = this.sn.height
-
-        this.initialize()
-    }
-
-    initialize () {
-        //
     }
 
     createThreeWorld () {
