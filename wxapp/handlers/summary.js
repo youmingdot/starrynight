@@ -6,12 +6,19 @@ import SummarySprite from '../sprites/summary'
 class SummaryToucher extends Toucher {
 
     initialize () {
-        
+        this.hammer.on('tap', this.onTap.bind(this), { time: 1000 })
     }
 
+    onTap (event) {
+        this.handler.onTap(event.center.x, event.center.y)
+    }
 }
 
 export default class SummaryHandler extends Handler {
+
+    setTrekHandler (trek) {
+        this.trek = trek
+    }
 
     initialize () {
         super.initialize()
@@ -21,6 +28,14 @@ export default class SummaryHandler extends Handler {
         this.summary = new SummarySprite(this.sn)
 
         this.sn.sprites.summary = this.summary
+    }
+
+    onTap (x, y) {
+        if (this.summary.inClose(x, y)) {
+            this.summary.doClose()
+
+            this.sn.setHandler
+        }
     }
 
     showMovie (movieId) {
@@ -37,6 +52,8 @@ export default class SummaryHandler extends Handler {
     showMovieInfo (result) {
         let movie = result.data.data.movie
 
+        console.log(movie)
+
         this.summary.setMovie(movie)
 
         wx.downloadFile({
@@ -49,5 +66,17 @@ export default class SummaryHandler extends Handler {
         let filePath = result.tempFilePath
 
         this.summary.setMoviePoster(filePath)
+    }
+
+    pause () {
+        super.pause()
+
+        this.toucher.pause()
+    }
+
+    resume () {
+        super.resume()
+
+        this.toucher.resume()
     }
 }

@@ -23,8 +23,6 @@ const POST_SEARCH_WITH_TAG_RESULT_MAX = 200
 const PARTICLE_THUMB_SIZE = 128
 const STEP_CIRCLE_PARTICLE_AMOUNT_PER_DEGREE = 100
 
-const DEFAULT_NOISE_RATIO = .05
-
 export default class StarrySprite extends Sprite {
 
     initialize () {
@@ -34,6 +32,8 @@ export default class StarrySprite extends Sprite {
 
         this.createThreeWorld()
 
+        this.scene.fog = new THREE.FogExp2(0x070707, 0.0006)
+
         this.renderer.shadowMap.enabled = true
         
         this.simplex = new SimplexNoise()
@@ -42,16 +42,16 @@ export default class StarrySprite extends Sprite {
         this.colorMapTexture.wrapS = THREE.RepeatWrapping
         this.colorMapTexture.wrapT = THREE.RepeatWrapping
 
-        this.cameraPosition = new THREE.Vector3(0, 0, 0)
+        this.zoom = 0
+
+        this.cameraPosition = new THREE.Vector3(0, SCENE_CAMERA_VERTICAL_BASE_DISTANCE, 0)
+        this.cameraAngle = 0
+        this.cameraUp = new THREE.Vector3(0, 1, 0)
+        this.cameraLookAt = new THREE.Vector3(0, SCENE_CAMERA_VERTICAL_BASE_DISTANCE, SCENE_CAMERA_HORIZONTAL_DISTANCE)
 
         this.initializeCloud()
 
         this.setVisible(true)
-
-        this.camera.position.set(0, 110, 746)
-
-        this.camera.up.set(0, 1, 0)
-        this.camera.lookAt(-121, 110, 6)
 
         this.entryStarry()
     }
@@ -96,10 +96,13 @@ export default class StarrySprite extends Sprite {
         
             const float PI = 3.14159265358979323846264;
             
+            #include <fog_pars_vertex>
             #include <snoise2d>
             
             void main(void) {
                 vec3 refPos = position + uPosFieldOffset;
+
+                #include <begin_vertex>
 
                 vColorMapPos = refPos.xz;
 
@@ -136,6 +139,10 @@ export default class StarrySprite extends Sprite {
                 gl_PointSize = mix(500.0, 5000.0, pow(uZoom, 2.1)) / distanceToCamera * 6.0 * mix(0.4, 1.0, fixedPosNoiseRatio) * (.8 + blinkRatio * .3);
 
                 gl_Position = projectionMatrix * modelViewPos;
+
+                vec4 mvPosition = modelViewMatrix * vec4( transformed, 1.0 );
+
+                #include <fog_vertex>
             }
         `
 
@@ -147,6 +154,7 @@ export default class StarrySprite extends Sprite {
             
             const float PI = 3.14159265358979323846264;
 
+            #include <common>
             #include <fog_pars_fragment>
             
             float clampNorm(float val, float min, float max) {
@@ -220,13 +228,40 @@ export default class StarrySprite extends Sprite {
         }
     }
     
-    move (x, y) {
-        
+    move (disX, disY) {
+        //this.cameraPosition.x += x 
+    }
+
+    calculateCamera () {
+        this.cameraPosition.y = this.calculateHight(this.zoom)
+
+         
+    }
+
+    calculateHight (k) {
+        let s = 1.70158
+
+        let pos = 1 - k * k * ((s + 1) * k - s)
+
+        return SCENE_CAMERA_VERTICAL_DOWN_DISTANCE + (SCENE_CAMERA_VERTICAL_BASE_DISTANCE - SCENE_CAMERA_VERTICAL_DOWN_DISTANCE) * pos
     }
 
     update (time) {
+        this.calculateCamera()
+
+        this.camera.position.copy(this.cameraPosition)
+        this.camera.up.copy(this.cameraUp)
+        this.camera.lookAt(this.cameraLookAt)
+
+        this.cameraPosition.x += 0.5
+        this.cameraPosition.z += 0.5
+
         for (let i = 0; i < this.clouds.length; i ++) {
             this.clouds[i].uniforms.uTime.value = time
+            this.clouds[i].uniforms.uCameraVector.value.x = this.cameraPosition.x
+            this.clouds[i].uniforms.uCameraVector.value.y = this.cameraPosition.y
+            this.clouds[i].uniforms.uCameraVector.value.z = this.cameraPosition.z
+            this.clouds[i].uniforms.uZoom.value = this.zoom
         }
     }
 }

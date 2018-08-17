@@ -1,6 +1,8 @@
 import Toucher from '../game/toucher'
 import Handler from 'handler'
 
+import SummaryHandler from '../handlers/summary'
+
 import StarrySprite from '../sprites/starry'
 
 class TrekToucher extends Toucher {
@@ -11,12 +13,15 @@ class TrekToucher extends Toucher {
         this.lastPanX = this.lastPanY = 0
 
         let panOptions = {
-            threshold: 2
+            threshold: 0
         }
 
         this.hammer.on('panstart', this.onPanStart.bind(this), panOptions)
         this.hammer.on('panmove', this.onPanMove.bind(this), panOptions)
         this.hammer.on('panend', this.onPanEnd.bind(this), panOptions)
+
+        this.hammer.on('tap', this.onTap.bind(this))
+        this.hammer.on('doubletap', this.onDoubleTap.bind(this))
     }
 
     onPanStart (event) {
@@ -27,6 +32,7 @@ class TrekToucher extends Toucher {
     }
 
     onPanMove (event) {
+        console.log(event)
         this.paning = true
 
         let dX = event.center.x - this.lastPanX
@@ -50,10 +56,17 @@ class TrekToucher extends Toucher {
         this.lastPanY = event.center.y
     }
 
+    onTap (event) {
+        console.log(event)
+    }
+
+    onDoubleTap (event) {
+        console.log(event)
+    }
+
     moveCamera (x, y) {
         this.handler.starry.move(-x * 0.05, y * 0.05)
     }
-
 }
 
 export default class TrekHandler extends Handler {
@@ -78,7 +91,13 @@ export default class TrekHandler extends Handler {
         this.toucher.resume()
     }
 
-    showStarryRiver () {
+    showMovie (movieId) {
+        let handler = new SummaryHandler(this.sn)
 
+        handler.setTrekHandler(this)
+
+        handler.showMovie(movieId)
+
+        this.sn.setHandler(handler)
     }
 }

@@ -26,11 +26,7 @@ export default class StarryNight {
 
         this.sprites = {}
 
-        let handler = new SummaryHandler(this)
-
-        this.setHandler(handler)
-
-        handler.showMovie(105)
+        this.setHandler(new TrekHandler(this))
     }
 
     run () {
