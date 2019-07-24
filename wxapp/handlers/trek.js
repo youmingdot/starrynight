@@ -32,7 +32,6 @@ class TrekToucher extends Toucher {
     }
 
     onPanMove (event) {
-        console.log(event)
         this.paning = true
 
         let dX = event.center.x - this.lastPanX
@@ -65,7 +64,7 @@ class TrekToucher extends Toucher {
     }
 
     moveCamera (x, y) {
-        this.handler.starry.move(-x * 0.05, y * 0.05)
+        this.handler.starry.move(x, y)
     }
 }
 

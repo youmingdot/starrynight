@@ -8,10 +8,9 @@ const PARTICLE_FIELD_SEGMENT_SIZE = 200
 const PARTICLE_FIELD_GRID_SEG = 3
 const PARTICLE_FIELD_GRID_SIZE = 2000
 
-const SCENE_CAMERA_HORIZONTAL_DISTANCE = 750
+const SCENE_CAMERA_HORIZONTAL_DISTANCE = 450
 const SCENE_CAMERA_VERTICAL_BASE_DISTANCE = 110
-const SCENE_CAMERA_VERTICAL_UP_DISTANCE = 200
-const SCENE_CAMERA_VERTICAL_DOWN_DISTANCE = 60
+const SCENE_CAMERA_VERTICAL_DISTANCE = 50
 
 const PARTICLE_TEXTURE_SIZE = 128
 
@@ -27,6 +26,8 @@ export default class StarrySprite extends Sprite {
 
     initialize () {
         super.initialize()
+
+        this.roX = this.roY = 0
 
         this.textureLoader = new THREE.TextureLoader()
 
@@ -44,10 +45,11 @@ export default class StarrySprite extends Sprite {
 
         this.zoom = 0
 
-        this.cameraPosition = new THREE.Vector3(0, SCENE_CAMERA_VERTICAL_BASE_DISTANCE, 0)
-        this.cameraAngle = 0
-        this.cameraUp = new THREE.Vector3(0, 1, 0)
-        this.cameraLookAt = new THREE.Vector3(0, SCENE_CAMERA_VERTICAL_BASE_DISTANCE, SCENE_CAMERA_HORIZONTAL_DISTANCE)
+        this.cameraPosition = new THREE.Vector3(0, 0, 0)
+        this.cameraUp = new THREE.Vector3(0, 0, 0)
+        this.cameraLookAt = new THREE.Vector3(0, 0, 0)
+
+        this.calculateCamera()
 
         this.initializeCloud()
 
@@ -229,32 +231,30 @@ export default class StarrySprite extends Sprite {
     }
     
     move (disX, disY) {
-        //this.cameraPosition.x += x 
+        this.roX -= disX * 0.01
+        this.roY -= disY * 0.01
+
+        //this.roY = Math.min(0, Math.max(this.roY, 1))
     }
 
     calculateCamera () {
-        this.cameraPosition.y = this.calculateHight(this.zoom)
+        this.cameraPosition.x = Math.sin(this.roX) * SCENE_CAMERA_HORIZONTAL_DISTANCE
+        this.cameraPosition.y = Math.sin(this.roY) * SCENE_CAMERA_VERTICAL_DISTANCE + SCENE_CAMERA_VERTICAL_BASE_DISTANCE
+        this.cameraPosition.z = Math.cos(this.roX) * SCENE_CAMERA_HORIZONTAL_DISTANCE
 
-         
-    }
-
-    calculateHight (k) {
-        let s = 1.70158
-
-        let pos = 1 - k * k * ((s + 1) * k - s)
-
-        return SCENE_CAMERA_VERTICAL_DOWN_DISTANCE + (SCENE_CAMERA_VERTICAL_BASE_DISTANCE - SCENE_CAMERA_VERTICAL_DOWN_DISTANCE) * pos
+        this.cameraUp.x = Math.cos(this.roX)
+        this.cameraUp.y = Math.cos(this.roY)
+        this.cameraUp.z = Math.sin(this.roX)
     }
 
     update (time) {
+        this.roX += 0.0001
+
         this.calculateCamera()
 
         this.camera.position.copy(this.cameraPosition)
         this.camera.up.copy(this.cameraUp)
         this.camera.lookAt(this.cameraLookAt)
-
-        this.cameraPosition.x += 0.5
-        this.cameraPosition.z += 0.5
 
         for (let i = 0; i < this.clouds.length; i ++) {
             this.clouds[i].uniforms.uTime.value = time
