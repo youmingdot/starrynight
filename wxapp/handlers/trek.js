@@ -8,63 +8,45 @@ import StarrySprite from '../sprites/starry'
 class TrekToucher extends Toucher {
 
     initialize () {
-        this.paning = false
-
-        this.lastPanX = this.lastPanY = 0
-
         let panOptions = {
             threshold: 0
         }
+
+        this.dolly = false
 
         this.hammer.on('panstart', this.onPanStart.bind(this), panOptions)
         this.hammer.on('panmove', this.onPanMove.bind(this), panOptions)
         this.hammer.on('panend', this.onPanEnd.bind(this), panOptions)
 
         this.hammer.on('tap', this.onTap.bind(this))
-        this.hammer.on('doubletap', this.onDoubleTap.bind(this))
     }
 
     onPanStart (event) {
-        this.paning = true
-
-        this.lastPanX = event.center.x
-        this.lastPanY = event.center.y
+        this.handler.starry.controls.onTouchStart(event)
     }
 
     onPanMove (event) {
-        this.paning = true
-
-        let dX = event.center.x - this.lastPanX
-        let dY = event.center.y - this.lastPanY
-
-        this.moveCamera(dX, dY)
-
-        this.lastPanX = event.center.x
-        this.lastPanY = event.center.y
+        this.handler.starry.controls.onTouchMove(event)
     }
 
     onPanEnd (event) {
-        this.paning = false
-
-        let dX = event.center.x - this.lastPanX
-        let dY = event.center.y - this.lastPanY
-
-        this.moveCamera(dX, dY)
-
-        this.lastPanX = event.center.x
-        this.lastPanY = event.center.y
+        this.handler.starry.controls.onTouchEnd(event)
     }
 
     onTap (event) {
-        console.log(event)
+        if (event.tapCount === 2) {
+            return this.onDoubleTap(event)
+        }
     }
 
     onDoubleTap (event) {
-        console.log(event)
-    }
-
-    moveCamera (x, y) {
-        this.handler.starry.move(x, y)
+        // if (this.dolly) {
+        //     this.handler.starry.controls.dollyOut(10)
+        // } else {
+        //     this.handler.starry.controls.dollyIn(10)
+        // }
+        //
+        // this.dolly = !this.dolly
     }
 }
 

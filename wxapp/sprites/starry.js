@@ -1,6 +1,7 @@
 import SimplexNoise from '../libs/simplex'
 import * as THREE from '../libs/three'
 import TWEEN from '../libs/tween'
+import OrbitControls from '../libs/orbit-controls'
 
 import Sprite from 'sprite'
 
@@ -45,17 +46,21 @@ export default class StarrySprite extends Sprite {
 
         this.zoom = 0
 
-        this.cameraPosition = new THREE.Vector3(0, 0, 0)
-        this.cameraUp = new THREE.Vector3(0, 0, 0)
-        this.cameraLookAt = new THREE.Vector3(0, 0, 0)
+        this.controls = new THREE.OrbitControls( this.camera, this.sn )
 
-        this.calculateCamera()
+        this.camera.position.set(100, 100, 100)
+        this.camera.up.set(0, 1, 0)
+        this.camera.lookAt(new THREE.Vector3(0, 0, 0))
 
         this.initializeCloud()
 
         this.setVisible(true)
 
         this.entryStarry()
+
+        // Set Controls
+        this.controls.autoRotate = true
+        this.controls.autoRotateSpeed = 1
     }
 
     initializeCloud () {
@@ -248,20 +253,22 @@ export default class StarrySprite extends Sprite {
     }
 
     update (time) {
-        this.roX += 0.0001
+        // this.roX += 0.0001
 
-        this.calculateCamera()
+        // this.calculateCamera()
 
-        this.camera.position.copy(this.cameraPosition)
-        this.camera.up.copy(this.cameraUp)
-        this.camera.lookAt(this.cameraLookAt)
+        // this.camera.position.copy(this.cameraPosition)
+        // this.camera.up.copy(this.cameraUp)
+        // this.camera.lookAt(this.cameraLookAt)
+
+        this.controls.update()
 
         for (let i = 0; i < this.clouds.length; i ++) {
             this.clouds[i].uniforms.uTime.value = time
-            this.clouds[i].uniforms.uCameraVector.value.x = this.cameraPosition.x
-            this.clouds[i].uniforms.uCameraVector.value.y = this.cameraPosition.y
-            this.clouds[i].uniforms.uCameraVector.value.z = this.cameraPosition.z
-            this.clouds[i].uniforms.uZoom.value = this.zoom
+            this.clouds[i].uniforms.uCameraVector.value.x = this.camera.position.x
+            this.clouds[i].uniforms.uCameraVector.value.y = this.camera.position.y
+            this.clouds[i].uniforms.uCameraVector.value.z = this.camera.position.z
+            this.clouds[i].uniforms.uZoom.value = this.camera.zoom * 0.1
         }
     }
 }

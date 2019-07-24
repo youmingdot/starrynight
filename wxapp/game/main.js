@@ -26,7 +26,7 @@ export default class StarryNight {
 
         this.sprites = {}
 
-        this.setHandler(new TrekHandler(this))
+        this.setHandler(new SplashHandler(this))
     }
 
     run () {
